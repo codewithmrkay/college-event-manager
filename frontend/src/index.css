@@ -1,0 +1,17 @@
+@font-face {
+  font-family: 'TestFont';
+  src: url('../src/assets/fonts/Moderniz.otf');
+  font-weight: 100;
+  font-style: normal;
+}
+
+.font-mangodolly {
+  font-family: TestFont;
+  font-weight: 100;
+}
+
+@import "tailwindcss";
+
+@plugin "daisyui" {
+  themes: light --default;
+}
