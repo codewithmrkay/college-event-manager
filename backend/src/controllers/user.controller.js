@@ -10,22 +10,22 @@ export const getUserProfile = async (req, res) => {
         res.status(200).json({
             _id: user._id,
             email: user.email,
-            
+
             // About section
             fullName: user.fullName,
             gender: user.gender,
             profilePic: user.profilePic,
-            
+
             // College info section
             department: user.department,
             class: user.class,
             rollNo: user.rollNo,
             collegeFeeImg: user.collegeFeeImg,
-            
+
             // Contact section
             phoneNumber: user.phoneNumber,
             links: user.links, // social media links
-            
+
             // Status
             role: user.role,
             isOnboarded: user.isOnboarded,
@@ -90,7 +90,7 @@ export const updateAboutInfo = async (req, res) => {
 
         user.fullName = fullName.trim();
         if (gender) user.gender = gender;
-        
+
         await user.save();
 
         res.status(200).json({
@@ -115,31 +115,31 @@ export const updateCollegeInfo = async (req, res) => {
 
         // Validation
         if (!department || !userClass || !rollNo) {
-            return res.status(400).json({ 
-                message: "Department, class, and roll number are required" 
+            return res.status(400).json({
+                message: "Department, class, and roll number are required"
             });
         }
 
         const validDepartments = ['BCS', 'BCA', 'BBA', 'BCOM', 'BSC'];
         if (!validDepartments.includes(department)) {
-            return res.status(400).json({ 
-                message: `Invalid department. Must be one of: ${validDepartments.join(', ')}` 
+            return res.status(400).json({
+                message: `Invalid department. Must be one of: ${validDepartments.join(', ')}`
             });
         }
 
         const validClasses = ['1st Year', '2nd Year', '3rd Year', '4th Year'];
         if (!validClasses.includes(userClass)) {
-            return res.status(400).json({ 
-                message: `Invalid class. Must be one of: ${validClasses.join(', ')}` 
+            return res.status(400).json({
+                message: `Invalid class. Must be one of: ${validClasses.join(', ')}`
             });
         }
 
         // Check if roll number already exists (exclude current user)
-        const existingRollNo = await User.findOne({ 
-            rollNo: rollNo.trim(), 
-            _id: { $ne: user._id } 
+        const existingRollNo = await User.findOne({
+            rollNo: rollNo.trim(),
+            _id: { $ne: user._id }
         });
-        
+
         if (existingRollNo) {
             return res.status(400).json({ message: "Roll number already exists" });
         }
@@ -147,7 +147,7 @@ export const updateCollegeInfo = async (req, res) => {
         user.department = department;
         user.class = userClass;
         user.rollNo = rollNo.trim();
-        
+
         await user.save();
 
         res.status(200).json({
@@ -183,7 +183,7 @@ export const updateCollegeFeeImage = async (req, res) => {
         user.collegeFeeImg = collegeFeeImg;
         // Reset verification when new fee receipt is uploaded
         user.isVerified = false;
-        
+
         await user.save();
 
         res.status(200).json({
@@ -205,13 +205,17 @@ export const updateContactDetails = async (req, res) => {
     try {
         const user = req.user;
         const { phoneNumber, links } = req.body;
-
+        if (!phoneNumber) {
+            return res.status(400).json({
+                message: "Please Provide Phone Number"
+            });
+        }
         // Phone number validation (optional field)
         if (phoneNumber) {
             const phoneRegex = /^[0-9]{10}$/;
             if (!phoneRegex.test(phoneNumber)) {
-                return res.status(400).json({ 
-                    message: "Invalid phone number. Must be 10 digits." 
+                return res.status(400).json({
+                    message: "Invalid phone number. Must be 10 digits."
                 });
             }
             user.phoneNumber = phoneNumber;
@@ -221,9 +225,9 @@ export const updateContactDetails = async (req, res) => {
         if (links) {
             // Validate each link if provided
             const validLinks = {};
-            
+
             if (links.linkedin) {
-                if (!links.linkedin.startsWith('https://linkedin.com/') && 
+                if (!links.linkedin.startsWith('https://linkedin.com/') &&
                     !links.linkedin.startsWith('https://www.linkedin.com/')) {
                     return res.status(400).json({ message: "Invalid LinkedIn URL" });
                 }
@@ -242,7 +246,7 @@ export const updateContactDetails = async (req, res) => {
                     new URL(links.insta);
                     validLinks.insta = links.insta;
                 } catch {
-                    return res.status(400).json({ message: "Invalid portfolio URL" });
+                    return res.status(400).json({ message: "Invalid Insta URL" });
                 }
             }
 
@@ -289,7 +293,7 @@ export const completeOnboarding = async (req, res) => {
             .map(([key]) => key);
 
         if (missingFields.length > 0) {
-            return res.status(400).json({ 
+            return res.status(400).json({
                 message: "Please complete all required sections",
                 missingFields
             });

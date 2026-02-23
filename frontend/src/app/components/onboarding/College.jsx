@@ -88,7 +88,7 @@ const College = () => {
     };
 
     return (
-        <div className="collapse collapse-arrow bg-base-100 border border-gray-200 rounded-lg">
+        <div className="shadow-xl collapse collapse-arrow bg-base-100 border border-gray-200 rounded-lg">
             <input 
                 type="checkbox" 
                 checked={isOpen} 

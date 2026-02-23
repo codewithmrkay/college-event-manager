@@ -3,7 +3,7 @@ import { Check, Upload, Loader2 } from 'lucide-react';
 import { useUserStore } from '../../store/user.store';
 import toast from 'react-hot-toast';
 
-const ProfileImage = () => {
+const CollegeFee = () => {
     const [preview, setPreview] = useState(null);
     const [cloudinaryUrl, setCloudinaryUrl] = useState('');
     const [uploading, setUploading] = useState(false);
@@ -11,16 +11,16 @@ const ProfileImage = () => {
     const [error, setError] = useState('');
     const [isOpen, setIsOpen] = useState(true); // Open by default
 
-    const { user, getuploadsign, updateProfilePicture } = useUserStore();
+    const { user, getuploadsign, updateCollegeFeeImage } = useUserStore();
 
     useEffect(() => {
-        if (user?.profilePic) {
-            setPreview(user.profilePic)
+        if (user?.collegeFeeImg) {
+            setPreview(user.collegeFeeImg)
             setIsOpen(false);
         };
-    }, [user?.profilePic]);
+    }, [user?.collegeFeeImg]);
 
-    const isSaved = user?.profilePic && !cloudinaryUrl;
+    const isSaved = user?.collegeFeeImg && !cloudinaryUrl;
 
     const handleFileChange = async (e) => {
         const file = e.target.files[0];
@@ -36,7 +36,7 @@ const ProfileImage = () => {
             return;
         }
 
-        if (file.size > 2 * 1024 * 1024) {
+        if (file.size > 5 * 1024 * 1024) {
             setError('Image must be less than 2MB');
             toast.error('Image must be less than 2MB');
             return;
@@ -49,11 +49,11 @@ const ProfileImage = () => {
         img.onload = async () => {
             URL.revokeObjectURL(url);
 
-            if (img.width !== img.height) {
-                setError('Image must be square');
-                toast.error('Image must be square');
-                return;
-            }
+            // if (img.width !== img.height) {
+            //     setError('Image must be square');
+            //     toast.error('Image must be square');
+            //     return;
+            // }
 
             // Valid - show preview and upload
             setPreview(URL.createObjectURL(file));
@@ -64,7 +64,7 @@ const ProfileImage = () => {
 
             try {
                 // Get signature
-                const signData = await getuploadsign({ folder: 'profiles' });
+                const signData = await getuploadsign({ folder: 'fee-receipts' });
 
                 if (!signData.data.cloudName) {
                     throw new Error('Missing cloud configuration');
@@ -91,14 +91,14 @@ const ProfileImage = () => {
                 setCloudinaryUrl(data.secure_url);
 
                 // Success toast
-                toast.success('Image uploaded! Click Save to update profile', {
+                toast.success('Image uploaded! Click Save to update College Fee Picture', {
                     id: uploadToast,
                     duration: 4000
                 });
 
             } catch (err) {
                 setError(err.message || 'Upload failed');
-                setPreview(user?.profilePic || null);
+                setPreview(user?.collegeFeeImg || null);
                 toast.error(err.message || 'Upload failed', { id: uploadToast });
             } finally {
                 setUploading(false);
@@ -120,14 +120,14 @@ const ProfileImage = () => {
         setSaving(true);
         setError('');
 
-        const saveToast = toast.loading('Saving profile picture...');
+        const saveToast = toast.loading('Saving Fees picture...');
 
         try {
-            const result = await updateProfilePicture(cloudinaryUrl);
+            const result = await updateCollegeFeeImage(cloudinaryUrl);
             if (!result.success) throw new Error(result.error || 'Failed to save');
 
             setCloudinaryUrl('');
-            toast.success('Profile picture saved successfully!', { id: saveToast });
+            toast.success('Fees picture saved successfully!', { id: saveToast });
 
         } catch (err) {
             setError(err.message);
@@ -145,7 +145,7 @@ const ProfileImage = () => {
     // };
 
     return (
-        <div className="collapse collapse-arrow bg-base-100 border shadow-xl border-gray-200 rounded-lg">
+        <div className="shadow-xl collapse collapse-arrow bg-base-100 border border-gray-200 rounded-lg">
             <input type="checkbox" checked={isOpen}
                 onChange={(e) => setIsOpen(e.target.checked)} />
 
@@ -155,8 +155,8 @@ const ProfileImage = () => {
                     {isSaved ? <Check className="w-5 h-5 text-white" strokeWidth={3} /> : <Upload className="w-5 h-5 text-white" />}
                 </div>
                 <div>
-                    <h3 className="text-lg font-semibold">Profile Picture</h3>
-                    <p className="text-sm text-gray-500">Square image, max 2MB</p>
+                    <h3 className="text-lg font-semibold">College Fees Picture</h3>
+                    <p className="text-sm text-gray-500">max 5MB</p>
                 </div>
             </div>
 
@@ -170,12 +170,12 @@ const ProfileImage = () => {
                             }`}>
 
                             {preview ? (
-                                <img src={preview} alt="Profile" className="w-full h-full object-cover" />
+                                <img src={preview} alt="college fees img" className="w-full h-full object-cover" />
                             ) : (
                                 <div className="flex flex-col items-center justify-center h-full text-gray-400">
                                     <Upload className="w-12 h-12 mb-2" />
                                     <p className="text-sm font-medium">Click to upload</p>
-                                    <p className="text-xs mt-1">Square (max 2MB)</p>
+                                    <p className="text-xs mt-1">(max 5MB)</p>
                                 </div>
                             )}
 
@@ -242,4 +242,4 @@ const ProfileImage = () => {
     );
 };
 
-export default ProfileImage;
+export default CollegeFee;
