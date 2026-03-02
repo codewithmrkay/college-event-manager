@@ -74,6 +74,10 @@ export const SignUp = () => {
         navigate('/signin');
     };
 
+    const handleGoogleAuth = () => {
+        window.location.href = 'http://localhost:5000/api/auth/google';
+    };
+
     return (
         <div className="min-h-screen flex items-center justify-center p-4 font-sans bg-base-300 w-full">
             <div className="card w-full max-w-md bg-base-100 shadow-xl border border-base-300">
@@ -91,7 +95,10 @@ export const SignUp = () => {
                         </p>
                     </div>
 
-                    <button className="btn btn-xl text-lg btn-outline text-base-content/70 flex items-center gap-3 normal-case hover:bg-blue-50 border-base-300">
+                    <button
+                        onClick={handleGoogleAuth}
+                        className="btn btn-xl text-lg btn-outline text-base-content/70 flex items-center gap-3 normal-case hover:bg-blue-50 border-base-300"
+                    >
                         <img src="/images/google.svg" alt="Google" className="w-5 h-5" />
                         Continue with Google
                     </button>

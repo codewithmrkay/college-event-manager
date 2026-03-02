@@ -13,7 +13,7 @@ export const useAuthStore = create((set) => ({
       set({ loading: true, error: null });
 
       const data = await signup(formData);
-      console.log(data.email)
+      console.log(data)
       set({
         email: data.email,
         loading: false,

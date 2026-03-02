@@ -66,8 +66,8 @@ const ProfileImage = () => {
                 // Get signature
                 const signData = await getuploadsign({ folder: 'profiles' });
 
-                if (!signData.data.cloudName) {
-                    throw new Error('Missing cloud configuration');
+                if (!signData.success || !signData.data || !signData.data.cloudName) {
+                    throw new Error(signData.error || 'Missing cloud configuration');
                 }
 
                 const { signature, timestamp, cloudName, apiKey, folder } = signData.data;
@@ -85,7 +85,10 @@ const ProfileImage = () => {
                     { method: 'POST', body: formData }
                 );
 
-                if (!res.ok) throw new Error('Upload failed');
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    throw new Error(errorData.error?.message || 'Upload failed');
+                }
 
                 const data = await res.json();
                 setCloudinaryUrl(data.secure_url);
@@ -97,8 +100,10 @@ const ProfileImage = () => {
                 });
 
             } catch (err) {
+                console.error('Profile Upload Error:', err);
                 setError(err.message || 'Upload failed');
                 setPreview(user?.profilePic || null);
+                setCloudinaryUrl('');
                 toast.error(err.message || 'Upload failed', { id: uploadToast });
             } finally {
                 setUploading(false);

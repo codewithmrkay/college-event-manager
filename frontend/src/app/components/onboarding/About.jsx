@@ -18,7 +18,7 @@ const About = () => {
 
     // Load existing data and set accordion state
     useEffect(() => {
-        if (user?.fullName && user?.gender) {
+        if (user?.fullName && user?.gender.charAt(0).toUpperCase() + user?.gender.slice(1)) {
             const names = user.fullName.split(' ');
             setFormData({
                 firstName: names[0] || '',
@@ -26,6 +26,7 @@ const About = () => {
                 lastName: names[2] || '',
                 gender: user.gender || ''
             });
+            console.log(user.gender)
             setIsOpen(false); // Close if already saved
         }
     }, [user?.fullName, user?.gender]);
@@ -101,17 +102,16 @@ const About = () => {
 
     return (
         <div className="shadow-xl collapse collapse-arrow bg-base-100 border border-gray-200 rounded-lg">
-            <input 
-                type="checkbox" 
-                checked={isOpen} 
+            <input
+                type="checkbox"
+                checked={isOpen}
                 onChange={(e) => setIsOpen(e.target.checked)}
             />
 
             {/* Header */}
             <div className="collapse-title flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
-                    isSaved ? 'bg-emerald-500' : 'bg-gray-300'
-                }`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isSaved ? 'bg-emerald-500' : 'bg-gray-300'
+                    }`}>
                     {isSaved ? (
                         <Check className="w-5 h-5 text-white" strokeWidth={3} />
                     ) : (
@@ -138,9 +138,8 @@ const About = () => {
                             placeholder="Enter your first name"
                             value={formData.firstName}
                             onChange={(e) => handleChange('firstName', e.target.value)}
-                            className={`input font-semibold input-lg w-full border-2 ${
-                                errors.firstName ? 'border-red-500' : 'border-gray-300'
-                            } focus:border-blue-500 focus:outline-none`}
+                            className={`input font-semibold input-lg w-full border-2 ${errors.firstName ? 'border-red-500' : 'border-gray-300'
+                                } focus:border-blue-500 focus:outline-none`}
                             disabled={saving}
                         />
                         {errors.firstName && (
@@ -158,9 +157,8 @@ const About = () => {
                             placeholder="Enter your middle name"
                             value={formData.middleName}
                             onChange={(e) => handleChange('middleName', e.target.value)}
-                             className={`input font-semibold input-lg w-full border-2 ${
-                                errors.middleName ? 'border-red-500' : 'border-gray-300'
-                            } focus:border-blue-500 focus:outline-none`}
+                            className={`input font-semibold input-lg w-full border-2 ${errors.middleName ? 'border-red-500' : 'border-gray-300'
+                                } focus:border-blue-500 focus:outline-none`}
                             disabled={saving}
                         />
                         {errors.middleName && (
@@ -178,9 +176,8 @@ const About = () => {
                             placeholder="Enter your last name"
                             value={formData.lastName}
                             onChange={(e) => handleChange('lastName', e.target.value)}
-                            className={`input font-semibold input-lg w-full  border-2 ${
-                                errors.lastName ? 'border-red-500' : 'border-gray-300'
-                            } focus:border-blue-500 focus:outline-none`}
+                            className={`input font-semibold input-lg w-full  border-2 ${errors.lastName ? 'border-red-500' : 'border-gray-300'
+                                } focus:border-blue-500 focus:outline-none`}
                             disabled={saving}
                         />
                         {errors.lastName && (
@@ -195,9 +192,8 @@ const About = () => {
                         </label>
                         <div className="flex flex-col gap-3">
                             {/* Male */}
-                            <label className={`flex items-center gap-3 cursor-pointer p-4 border rounded-lg hover:border-primary transition-colors ${
-                                errors.gender ? 'border-red-500' : 'border-gray-200'
-                            }`}>
+                            <label className={`flex items-center gap-3 cursor-pointer p-4 border rounded-lg hover:border-primary transition-colors ${errors.gender ? 'border-red-500' : 'border-gray-200'
+                                }`}>
                                 <input
                                     type="checkbox"
                                     checked={formData.gender === 'Male'}
@@ -209,9 +205,8 @@ const About = () => {
                             </label>
 
                             {/* Female */}
-                            <label className={`flex items-center gap-3 cursor-pointer p-4 border rounded-lg hover:border-primary transition-colors ${
-                                errors.gender ? 'border-red-500' : 'border-gray-200'
-                            }`}>
+                            <label className={`flex items-center gap-3 cursor-pointer p-4 border rounded-lg hover:border-primary transition-colors ${errors.gender ? 'border-red-500' : 'border-gray-200'
+                                }`}>
                                 <input
                                     type="checkbox"
                                     checked={formData.gender === 'Female'}
@@ -223,9 +218,8 @@ const About = () => {
                             </label>
 
                             {/* Other */}
-                            <label className={`flex items-center gap-3 cursor-pointer p-4 border rounded-lg hover:border-primary transition-colors ${
-                                errors.gender ? 'border-red-500' : 'border-gray-200'
-                            }`}>
+                            <label className={`flex items-center gap-3 cursor-pointer p-4 border rounded-lg hover:border-primary transition-colors ${errors.gender ? 'border-red-500' : 'border-gray-200'
+                                }`}>
                                 <input
                                     type="checkbox"
                                     checked={formData.gender === 'Other'}

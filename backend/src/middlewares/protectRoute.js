@@ -35,3 +35,15 @@ const protectRoute = async (req, res, next) => {
 };
 
 export default protectRoute;
+
+/**
+ * requireRole(...roles)
+ * Factory middleware — must be used AFTER protectRoute (req.user must exist).
+ * Usage: router.post('/route', protectRoute, requireRole('admin', 'super-admin'), handler)
+ */
+export const requireRole = (...roles) => (req, res, next) => {
+    if (!req.user || !roles.includes(req.user.role)) {
+        return res.status(403).json({ message: "Forbidden: insufficient permissions" });
+    }
+    next();
+};

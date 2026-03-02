@@ -95,7 +95,7 @@ const OnboardingCard = () => {
     return (
         <>
             {/* Main Card */}
-            <div className="font-sans card bg-white shadow-xl border border-gray-200 rounded-2xl p-6 w-fit mx-auto">
+            <div className="font-sans card bg-white shadow-xl border border-gray-200 rounded-2xl p-6 w-full mx-auto">
                 
                 {/* Icon and Title */}
                 <div className="flex items-center gap-4 mb-6">

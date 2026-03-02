@@ -1,8 +1,72 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../store/auth.store';
+import { toast } from 'react-hot-toast';
 
 export const SignIn = () => {
     const navigate = useNavigate();
+    const { login, error: apierror, loading } = useAuthStore();
+
+    const [formData, setFormData] = useState({
+        email: '',
+        password: ''
+    });
+
+    const [errors, setErrors] = useState({
+        email: '',
+        password: ''
+    });
+
+    useEffect(() => {
+        if (apierror) {
+            toast.error(apierror);
+        }
+    }, [apierror]);
+
+    const validateField = (name, value) => {
+        let errorMsg = '';
+        if (name === 'email') {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (value && !emailRegex.test(value)) {
+                errorMsg = 'Please enter a valid email address.';
+            }
+        } else if (name === 'password') {
+            if (value && value.length < 6) {
+                errorMsg = 'Password must be at least 6 characters long.';
+            }
+        }
+        return errorMsg;
+    };
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
+        const fieldError = validateField(name, value);
+        setErrors((prev) => ({ ...prev, [name]: fieldError }));
+    };
+
+    const handleContinue = async () => {
+        const emailErr = validateField('email', formData.email);
+        const passErr = validateField('password', formData.password);
+
+        if (emailErr || passErr || !formData.email || !formData.password) {
+            setErrors({
+                email: emailErr || (!formData.email ? 'Email is required' : ''),
+                password: passErr || (!formData.password ? 'Password is required' : '')
+            });
+            return;
+        }
+
+        const success = await login(formData);
+        if (success) {
+            toast.success("Login successful!");
+            navigate('/');
+        }
+    };
+
+    const handleGoogleAuth = () => {
+        window.location.href = 'http://localhost:5000/api/auth/google';
+    };
 
     const handleSignUpRedirect = () => {
         navigate('/signup');
@@ -27,7 +91,10 @@ export const SignIn = () => {
                         </p>                    </div>
 
                     {/* Google Login Option */}
-                    <button className="btn btn-xl text-lg btn-outline text-base-content/70 flex items-center gap-3 normal-case hover:bg-blue-50 border-base-300">
+                    <button
+                        onClick={handleGoogleAuth}
+                        className="btn btn-xl text-lg btn-outline text-base-content/70 flex items-center gap-3 normal-case hover:bg-blue-50 border-base-300"
+                    >
                         <img src="/images/google.svg" alt="Google" className="w-5 h-5" />
                         Continue with Google
                     </button>
@@ -35,21 +102,44 @@ export const SignIn = () => {
                     <div className="divider text-xs text-base-content/40 uppercase">Or</div>
 
                     {/* Form Fields */}
-                    <div className="flex flex-col gap-6">
-                        <input
-                            type="email"
-                            placeholder="Email Address"
-                            className="w-full bg-transparent rounded-xl text-xl px-2 border-2 border-gray-200 py-3 outline-none transition-colors focus:border-blue-500 placeholder:text-gray-400"
-                        />
+                    <div className="flex flex-col gap-4">
+                        <div>
+                            <input
+                                type="email"
+                                name="email"
+                                placeholder="Email Address"
+                                value={formData.email}
+                                onChange={handleChange}
+                                className={`w-full bg-transparent rounded-xl text-xl px-2 border-2 py-3 outline-none transition-colors focus:border-blue-500 placeholder:text-gray-400 ${errors.email ? 'border-red-500' : 'border-gray-200'}`}
+                            />
+                            {errors.email && <p className='text-red-500 text-sm mt-1'>{errors.email}</p>}
+                        </div>
 
-                        <input
-                            type="password"
-                            placeholder="Password"
-                            className="w-full bg-transparent rounded-xl text-xl px-2 border-2 border-gray-200 py-3 outline-none transition-colors focus:border-blue-500 placeholder:text-gray-400"
-                        />
+                        <div>
+                            <input
+                                type="password"
+                                name="password"
+                                placeholder="Password"
+                                value={formData.password}
+                                onChange={handleChange}
+                                className={`w-full bg-transparent rounded-xl text-xl px-2 border-2 py-3 outline-none transition-colors focus:border-blue-500 placeholder:text-gray-400 ${errors.password ? 'border-red-500' : 'border-gray-200'}`}
+                            />
+                            {errors.password && <p className='text-red-500 text-sm mt-1'>{errors.password}</p>}
+                        </div>
 
-                        <button className="btn btn-xl w-full bg-blue-500 w-full mt-4 normal-case text-white shadow-lg shadow-blue-200">
-                            Continue
+                        <button
+                            onClick={handleContinue}
+                            disabled={loading}
+                            className={`btn btn-xl w-full mt-4 normal-case text-white shadow-lg ${loading ? "bg-gray-400 cursor-not-allowed shadow-none" : "bg-blue-500 hover:bg-blue-600 shadow-blue-200"} transition-all duration-200`}
+                        >
+                            {loading ? (
+                                <div className="flex items-center gap-2">
+                                    <span className="loading loading-spinner loading-sm"></span>
+                                    <span>Signing In...</span>
+                                </div>
+                            ) : (
+                                <span>Continue</span>
+                            )}
                         </button>
                     </div>
                 </div>

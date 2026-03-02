@@ -1,14 +1,16 @@
 import { useLocation, useNavigate } from "react-router-dom";
 
-export const MiddlePart = () => {
+export const AdminMiddlePart = () => {
     const location = useLocation();
     const currentPath = location.pathname;
     const navigate = useNavigate();
 
-    const navpages = ['Home','Dashboard','Events', 'Applications'];
+    const navpages = ['Home', 'Dashboard', 'Manage Events'];
 
     const handleclick = (val) => {
-        const path = val === 'Home' ? '/' : `/${val.toLowerCase()}`;
+        let path = '/';
+        if (val === 'Dashboard') path = '/admin-dashboard';
+        if (val === 'Manage Events') path = '/admin/events';
         navigate(path);
     };
 
@@ -16,8 +18,13 @@ export const MiddlePart = () => {
         <div>
             <div className="flex items-center justify-center gap-5 font-medium">
                 {navpages.map((page) => {
-                    const pagePath = page === 'Home' ? '/' : `/${page.toLowerCase()}`;
-                    const isActive = currentPath === pagePath;
+                    let pagePath = '/';
+                    if (page === 'Dashboard') pagePath = '/admin-dashboard';
+                    if (page === 'Manage Events') pagePath = '/admin/events';
+
+                    // Exact match for admin root, otherwise startsWith is tricky, so let's do exact match except maybe for events
+                    const isActive = currentPath === pagePath || (page === 'Manage Events' && currentPath.startsWith('/admin/events/'));
+
                     return (
                         <li
                             key={page}

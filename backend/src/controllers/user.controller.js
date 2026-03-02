@@ -164,15 +164,18 @@ export const updateCollegeInfo = async (req, res) => {
 };
 
 // ═════════════════════════════════════════════
-// UPDATE COLLEGE FEE IMAGE
+// UPDATE COLLEGE FEE IMAGE + RECEIPT NUMBER
 // ═════════════════════════════════════════════
 export const updateCollegeFeeImage = async (req, res) => {
     try {
         const user = req.user;
-        const { collegeFeeImg } = req.body;
+        const { collegeFeeImg, feeReceiptNo } = req.body;
 
         if (!collegeFeeImg) {
             return res.status(400).json({ message: "Fee receipt URL is required" });
+        }
+        if (!feeReceiptNo || !feeReceiptNo.trim()) {
+            return res.status(400).json({ message: "Fee receipt number is required" });
         }
 
         // Validate Cloudinary URL
@@ -181,6 +184,7 @@ export const updateCollegeFeeImage = async (req, res) => {
         }
 
         user.collegeFeeImg = collegeFeeImg;
+        user.feeReceiptNo = feeReceiptNo.trim().toUpperCase();
         // Reset verification when new fee receipt is uploaded
         user.isVerified = false;
 
@@ -189,6 +193,7 @@ export const updateCollegeFeeImage = async (req, res) => {
         res.status(200).json({
             message: "Fee receipt uploaded. Waiting for admin verification.",
             collegeFeeImg: user.collegeFeeImg,
+            feeReceiptNo: user.feeReceiptNo,
             isVerified: user.isVerified
         });
 

@@ -41,7 +41,7 @@ const userSchema = new mongoose.Schema({
     gender: {
         type: String,
         trim: true,
-        default:"male"
+        default: "male"
     },
     phoneNumber: {
         type: String,
@@ -71,6 +71,13 @@ const userSchema = new mongoose.Schema({
     collegeFeeImg: {
         type: String  // Cloudinary URL of fee receipt
     },
+    feeReceiptNo: {
+        type: String,
+        trim: true,
+        default: null,
+        // The check/DD/receipt number printed on the college fee receipt.
+        // Super-admin cross-references this with the Excel import.
+    },
     links: {
         linkedin: { type: String },
         github: { type: String },
@@ -82,13 +89,25 @@ const userSchema = new mongoose.Schema({
         enum: ['student', 'admin', 'super-admin'],
         default: 'student'
     },
+    // Admin-specific: which event categories this admin manages
+    // e.g. ['Technical', 'Cultural'] — assigned by super-admin on promotion
+    adminCategory: {
+        type: [String],
+        enum: ['Technical', 'Cultural', 'Sports', 'Academic', 'Social', 'Other'],
+        default: [],
+    },
+    adminCategoryDescription: {
+        type: String,
+        trim: true,
+        default: null,
+    },
     isOnboarded: {
         type: Boolean,
         default: false
     },
     isVerified: {
         type: Boolean,
-        default: false  // Admin approval for students (after checking fee receipt)
+        default: false  // Super-admin approval for students (after checking fee receipt)
     }
 }, { timestamps: true });
 

@@ -228,7 +228,7 @@ export const googleAuthCallback = async (req, res) => {
         const user = req.user;   // passport put this here
 
         if (!user) {
-            return res.redirect("http://localhost:3000/login?error=auth_failed");
+            return res.redirect("http://localhost:5173/login?error=auth_failed");
         }
 
         // Generate JWT
@@ -240,14 +240,14 @@ export const googleAuthCallback = async (req, res) => {
         // Redirect to frontend
         // isOnboarded tells frontend whether to show onboarding or dashboard
         if (!user.isOnboarded) {
-            res.redirect("http://localhost:3000/onboarding");
+            res.redirect("http://localhost:5173/profile");
         } else {
-            res.redirect("http://localhost:3000/");
+            res.redirect("http://localhost:5173/");
         }
 
     } catch (error) {
         console.log("Error in googleAuthCallback:", error);
-        res.redirect("http://localhost:3000/login?error=server_error");
+        res.redirect("http://localhost:5173/login?error=server_error");
     }
 };
 
