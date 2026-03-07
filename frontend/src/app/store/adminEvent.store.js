@@ -11,7 +11,8 @@ import {
     updateEventCapacityApi,
     updateEventMediaApi,
     updateEventRulesApi,
-    getEventByIdAdminApi
+    getEventByIdAdminApi,
+    submitEventApi
 } from "../services/admin.services";
 
 export const useAdminEventStore = create((set, get) => ({
@@ -174,5 +175,22 @@ export const useAdminEventStore = create((set, get) => ({
             set({ error: error.response?.data?.message || "Update failed", loading: false });
             throw error;
         }
+    },
+
+    submitEvent: async (id) => {
+        try {
+            set({ loading: true, error: null });
+            const data = await submitEventApi(id);
+            // Mark the event as no longer a draft in store
+            set({ currentEvent: data.event, loading: false });
+            return data;
+        } catch (error) {
+            set({ error: error.response?.data?.message || "Submission failed", loading: false });
+            throw error;
+        }
+    },
+
+    resetCurrentEvent: () => {
+        set({ currentEvent: null });
     }
 }));

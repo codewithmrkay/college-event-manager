@@ -36,6 +36,25 @@ const protectRoute = async (req, res, next) => {
 
 export default protectRoute;
 
+export const optionalProtect = async (req, res, next) => {
+    try {
+        const token = req.cookies.jwt;
+        if (!token) {
+            return next();
+        }
+
+        const decode = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await User.findById(decode.userId).select("-password");
+        if (user) {
+            req.user = user;
+        }
+        next();
+    } catch (error) {
+        // If token is invalid or user not found, just proceed without req.user
+        next();
+    }
+};
+
 /**
  * requireRole(...roles)
  * Factory middleware — must be used AFTER protectRoute (req.user must exist).

@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import { useAdminEventStore } from '../../../store/adminEvent.store';
 import { useEffect } from 'react';
 
-const BasicInfo = ({ draftEventId, onSaved }) => {
+const BasicInfo = ({ draftEventId, onSaved, isCompleted }) => {
     const { createBasicEvent, updateEventBasicInfo, currentEvent } = useAdminEventStore();
 
     const [formData, setFormData] = useState({
@@ -23,9 +23,6 @@ const BasicInfo = ({ draftEventId, onSaved }) => {
                 title: currentEvent.title || '',
                 description: currentEvent.description || ''
             });
-            // If it's already saved and we have an ID, typically we might want it closed
-            // but the parent handles opening/closing usually. 
-            // Here we just ensure data is synced.
         }
     }, [draftEventId, currentEvent]);
 
@@ -68,7 +65,7 @@ const BasicInfo = ({ draftEventId, onSaved }) => {
                 await updateEventBasicInfo(draftEventId, formData);
                 toast.success('Basic info updated!', { id: saveToast });
                 setIsOpen(false);
-                onSaved(draftEventId); // Ensure parent knows it's saved/updated
+                onSaved('basic'); // Ensure parent knows it's saved/updated
             }
         } catch (err) {
             toast.error(err.message || 'Failed to save basic info', { id: saveToast });
@@ -77,7 +74,7 @@ const BasicInfo = ({ draftEventId, onSaved }) => {
         }
     };
 
-    const isSaved = draftEventId !== null && !isOpen;
+    const showCheck = isCompleted || (draftEventId !== null && !isOpen);
 
     return (
         <div className="shadow-xl collapse collapse-arrow bg-base-100 border border-gray-200 rounded-lg">
@@ -89,9 +86,9 @@ const BasicInfo = ({ draftEventId, onSaved }) => {
 
             {/* Header */}
             <div className="collapse-title flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isSaved ? 'bg-emerald-500' : 'bg-gray-300'
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${showCheck ? 'bg-emerald-500' : 'bg-gray-300'
                     }`}>
-                    {isSaved ? (
+                    {showCheck ? (
                         <Check className="w-5 h-5 text-white" strokeWidth={3} />
                     ) : (
                         <Edit3 className="w-5 h-5 text-white" />

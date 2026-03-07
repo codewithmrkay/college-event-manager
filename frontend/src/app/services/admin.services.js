@@ -68,3 +68,8 @@ export const updateEventRulesApi = async (id, payload) => {
     const { data } = await api.patch(`/admin/events/${id}/rules`, payload);
     return data;
 };
+
+export const submitEventApi = async (id) => {
+    const { data } = await api.post(`/admin/events/${id}/submit`);
+    return data;
+};

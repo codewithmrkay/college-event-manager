@@ -2,15 +2,15 @@
 import api from "./api";
 
 export const signup = async (data) => {
-  const res = await api.post("/auth/signup",data);
+  const res = await api.post("/auth/signup", data);
   return res.data;
 };
 export const verifyOTP = async (data) => {
-  const res = await api.post("/auth/verify-otp",data);
+  const res = await api.post("/auth/verify-otp", data);
   return res.data;
 };
 export const resendOTP = async (data) => {
-  const res = await api.post("/auth/resend-otp",data);
+  const res = await api.post("/auth/resend-otp", data);
   return res.data;
 };
 
@@ -25,6 +25,6 @@ export const logout = async () => {
 }
 
 export const me = async () => {
-  const res = await api.get("/auth/me");
+  const res = await api.get("/user/profile");
   return res.data;
 };

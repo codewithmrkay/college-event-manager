@@ -1,14 +1,21 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserStore } from '../../store/user.store';
 export const ProfileBtn = () => {
     const navigate = useNavigate();
     const { user, loading, getProfile } = useUserStore();
 
+    const [isChecking, setIsChecking] = useState(true);
     useEffect(() => {
-        // Fetch profile on mount to check if user session is active
-        getProfile();
-    }, [getProfile]);
+        const checkAuth = async () => {
+            // If user already exists in store, no need to fetch again
+            if (!user) {
+                await getProfile();
+            }
+            setIsChecking(false);
+        };
+        checkAuth();
+    }, [getProfile, user]);
 
     const handleSignIn = () => {
         navigate('/signin');

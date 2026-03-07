@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Image as ImageIcon, Check, Loader2, Upload } from 'lucide-react';
+import { Image as ImageIcon, Check, Loader2, Upload, ImagePlus } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useUserStore } from '../../../store/user.store';
 import { useAdminEventStore } from '../../../store/adminEvent.store';
 
-const MediaInfo = ({ draftEventId, onSaved }) => {
+const MediaInfo = ({ draftEventId, onSaved, isCompleted }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [isSaved, setIsSaved] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -15,7 +15,17 @@ const MediaInfo = ({ draftEventId, onSaved }) => {
     const [error, setError] = useState('');
 
     const { getuploadsign } = useUserStore();
-    const { updateEventMedia } = useAdminEventStore();
+    const { updateEventMedia, currentEvent } = useAdminEventStore();
+
+    // Load existing data
+    React.useEffect(() => {
+        if (draftEventId && currentEvent && currentEvent._id === draftEventId) {
+            if (currentEvent.bannerImage) {
+                setCloudinaryUrl(currentEvent.bannerImage);
+                setPreview(currentEvent.bannerImage);
+            }
+        }
+    }, [draftEventId, currentEvent]);
 
     const handleFileChange = async (e) => {
         const file = e.target.files[0];
@@ -40,7 +50,6 @@ const MediaInfo = ({ draftEventId, onSaved }) => {
         img.onload = async () => {
             URL.revokeObjectURL(url);
 
-            // Check 16/9 roughly
             const ratio = img.width / img.height;
             if (ratio < 1.7 || ratio > 1.8) {
                 toast.error('Warning: Image should ideally be 16:9 for best results.', { duration: 4000 });
@@ -98,6 +107,10 @@ const MediaInfo = ({ draftEventId, onSaved }) => {
     };
 
     const handleSave = async () => {
+        if (!cloudinaryUrl) {
+            toast.error('Please upload an image first');
+            return;
+        }
         setSaving(true);
         const id = toast.loading('Saving media...');
         try {
@@ -113,6 +126,8 @@ const MediaInfo = ({ draftEventId, onSaved }) => {
         }
     };
 
+    const showCheck = isCompleted || isSaved;
+
     if (!draftEventId) return null;
 
     return (
@@ -120,8 +135,8 @@ const MediaInfo = ({ draftEventId, onSaved }) => {
             <input type="checkbox" checked={isOpen} onChange={(e) => setIsOpen(e.target.checked)} />
 
             <div className="collapse-title flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isSaved ? 'bg-emerald-500' : 'bg-gray-300'}`}>
-                    {isSaved ? <Check className="w-5 h-5 text-white" strokeWidth={3} /> : <ImageIcon className="w-5 h-5 text-white" />}
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${showCheck ? 'bg-emerald-500' : 'bg-gray-300'}`}>
+                    {showCheck ? <Check className="w-5 h-5 text-white" strokeWidth={3} /> : <ImagePlus className="w-5 h-5 text-white" />}
                 </div>
                 <div>
                     <h3 className="text-lg font-semibold">Event Media</h3>
@@ -131,7 +146,6 @@ const MediaInfo = ({ draftEventId, onSaved }) => {
 
             <div className="collapse-content">
                 <div className="flex flex-col gap-4">
-
                     <label className="block w-full">
                         <div className={`relative w-full aspect-video md:w-3/4 lg:w-2/3 mx-auto border-2 border-dashed rounded-lg transition-colors overflow-hidden bg-gray-50 ${uploading || saving ? 'border-gray-300 cursor-not-allowed' : 'border-gray-300 hover:border-primary cursor-pointer'}`}>
                             {preview ? (
@@ -151,12 +165,11 @@ const MediaInfo = ({ draftEventId, onSaved }) => {
                                 </div>
                             )}
                         </div>
-
                         <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" disabled={uploading || saving} />
                     </label>
 
                     <div className="flex justify-end mt-2">
-                        <button onClick={handleSave} disabled={saving || uploading} className="btn btn-md bg-blue-500 hover:bg-blue-600 text-white">
+                        <button onClick={handleSave} disabled={saving || uploading} className="btn btn-md bg-blue-500 hover:bg-blue-600 text-white px-8 rounded-lg">
                             {saving ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</> : 'Save & Continue'}
                         </button>
                     </div>
@@ -165,4 +178,5 @@ const MediaInfo = ({ draftEventId, onSaved }) => {
         </div>
     );
 };
+
 export default MediaInfo;

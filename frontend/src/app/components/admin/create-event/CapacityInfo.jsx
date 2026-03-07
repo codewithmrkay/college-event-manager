@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import { useAdminEventStore } from '../../../store/adminEvent.store';
 import { useEffect } from 'react';
 
-const CapacityInfo = ({ draftEventId, onSaved }) => {
+const CapacityInfo = ({ draftEventId, onSaved, isCompleted }) => {
     const { updateEventCapacity, currentEvent } = useAdminEventStore();
 
     const [isOpen, setIsOpen] = useState(false);
@@ -28,9 +28,6 @@ const CapacityInfo = ({ draftEventId, onSaved }) => {
                 hasCertificate: currentEvent.hasCertificate !== undefined ? currentEvent.hasCertificate : true,
                 isRegistrationOpen: currentEvent.isRegistrationOpen !== undefined ? currentEvent.isRegistrationOpen : false
             });
-            if (currentEvent.maxParticipants !== undefined) {
-                setIsSaved(true);
-            }
         }
     }, [draftEventId, currentEvent]);
 
@@ -54,6 +51,8 @@ const CapacityInfo = ({ draftEventId, onSaved }) => {
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
+    const showCheck = isCompleted || isSaved;
+
     if (!draftEventId) return null;
 
     return (
@@ -65,9 +64,9 @@ const CapacityInfo = ({ draftEventId, onSaved }) => {
             />
 
             <div className="collapse-title flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isSaved ? 'bg-emerald-500' : 'bg-gray-300'
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${showCheck ? 'bg-emerald-500' : 'bg-gray-300'
                     }`}>
-                    {isSaved ? <Check className="w-5 h-5 text-white" strokeWidth={3} /> : <Users className="w-5 h-5 text-white" />}
+                    {showCheck ? <Check className="w-5 h-5 text-white" strokeWidth={3} /> : <Users className="w-5 h-5 text-white" />}
                 </div>
                 <div>
                     <h3 className="text-lg font-semibold">Capacity & Fees</h3>

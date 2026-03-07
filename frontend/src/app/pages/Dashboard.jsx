@@ -21,7 +21,7 @@ export const Dashboard = () => {
     return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
   }
 
-  if ((user.role == "admin")) {
+  if (user && user.role === "admin") {
     return <Navigate to="/admin-dashboard" />;
   }
   return (

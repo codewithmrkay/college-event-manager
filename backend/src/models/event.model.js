@@ -154,6 +154,14 @@ const eventSchema = new mongoose.Schema({
         type: [scheduleSchema],
         default: [],
     },
+    requiresMusic: {
+        type: Boolean,
+        default: false,
+    },
+    requiresPdf: {
+        type: Boolean,
+        default: false,
+    },
 
     // ── Status & Visibility ───────────────────────────────────────────────
     /**

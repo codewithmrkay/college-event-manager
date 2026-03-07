@@ -2,18 +2,35 @@ import React, { useState, useEffect } from 'react';
 import { ClipboardList, Loader2, Eye, LayoutDashboard, RefreshCcw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAdminEventStore } from '../../../store/adminEvent.store';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const EventCreationCard = ({ draftEventId, completedSteps = {} }) => {
     const [submitting, setSubmitting] = useState(false);
-    const { submitEvent } = useAdminEventStore();
+    const { submitEvent, resetCurrentEvent } = useAdminEventStore();
+    const navigate = useNavigate();
+
+    const handleReset = () => {
+        if (window.confirm('Are you sure you want to reset? All unsaved progress for this draft will be lost from the current session.')) {
+            resetCurrentEvent();
+            // Clear current draft's session storage if it exists
+            if (draftEventId) {
+                sessionStorage.removeItem(`savedSteps_${draftEventId}`);
+            }
+            toast.success('Event reset initiated');
+
+            // Give a tiny delay for the toast/state and then reload
+            setTimeout(() => {
+                window.location.reload();
+            }, 500);
+        }
+    };
 
     const calculateCompletion = () => {
-        const steps = ['basic', 'category', 'participation', 'dates', 'capacity', 'media', 'rules'];
+        const steps = ['basic', 'category', 'participation', 'dates', 'capacity', 'media', 'rules', 'submission'];
         const completedCount = steps.filter(step => completedSteps[step]).length;
 
         if (completedCount === 0) return 0;
-        return Math.floor((completedCount / steps.length) * 100);
+        return Math.round((completedCount / steps.length) * 100);
     };
 
     const completionPercentage = calculateCompletion();
@@ -29,7 +46,8 @@ const EventCreationCard = ({ draftEventId, completedSteps = {} }) => {
         const id = toast.loading('Submitting event for verification...');
         try {
             await submitEvent(draftEventId);
-            toast.success('Event submitted successfully!', { id });
+            toast.success('Event submitted for verification!', { id });
+            navigate('/admin/events');
         } catch (error) {
             toast.error(error.message || 'Error submitting event', { id });
         } finally {
@@ -96,7 +114,7 @@ const EventCreationCard = ({ draftEventId, completedSteps = {} }) => {
                 <div className="flex flex-col gap-3 pt-2">
                     <div className="flex gap-2">
                         <Link
-                            to={`/events/${draftEventId}?preview=true`}
+                            to={`/admin/events/${draftEventId}?preview=true`}
                             target="_blank"
                             className={`btn btn-lg flex-1 border-2 ${draftEventId
                                 ? 'bg-white border-blue-500 text-blue-500 hover:bg-blue-50'
@@ -107,15 +125,16 @@ const EventCreationCard = ({ draftEventId, completedSteps = {} }) => {
                             Preview Details
                         </Link>
 
-                        {draftEventId && (
-                            <button
-                                onClick={() => window.open(`/events/${draftEventId}?preview=true`, '_blank')}
-                                className="btn btn-lg bg-blue-50 border-2 border-blue-200 text-blue-600 hover:bg-blue-100 px-4"
-                                title="Refresh Preview"
-                            >
-                                <RefreshCcw className="w-5 h-5" />
-                            </button>
-                        )}
+                        <button
+                            onClick={handleReset}
+                            className={`btn btn-lg flex-1 border-2 ${draftEventId
+                                ? 'bg-white border-red-500 text-red-500 hover:bg-red-50'
+                                : 'bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed'
+                                }`}
+                        >
+                            <RefreshCcw className="w-5 h-5" />
+                            Reset
+                        </button>
                     </div>
 
                     <Link

@@ -7,27 +7,15 @@ import { Event } from '../models/event.model.js';
 const buildStatusFilter = (status) => {
     const now = new Date();
     if (status === 'past') {
-        // eventEndDate is set and in the past
-        return { eventEndDate: { $lt: now } };
+        // past: registrationStart < now
+        return { registrationStart: { $ne: null, $lt: now } };
     }
     if (status === 'live') {
-        // eventStartDate is set, in the future (or ongoing), and not yet ended
-        return {
-            eventStartDate: { $ne: null, $lte: now },
-            $or: [
-                { eventEndDate: null },
-                { eventEndDate: { $gte: now } },
-            ],
-        };
+        // live: registrationStart > now
+        return { registrationStart: { $ne: null, $gt: now } };
     }
-    if (status === 'upcoming-live') {
-        // live = date is fixed in the future (countdown phase)
-        return {
-            eventStartDate: { $ne: null, $gt: now },
-        };
-    }
-    // default: upcoming — no eventStartDate set yet (interest-check phase)
-    return { eventStartDate: null };
+    // upcoming: No registrationStart set yet
+    return { registrationStart: null };
 };
 
 /** Helper to find an event and verify admin coordination */
@@ -219,12 +207,14 @@ export const updateEventRules = async (req, res) => {
         const event = await findAdminEvent(req.params.id, req.user);
         if (!event) return res.status(404).json({ message: 'Event not found or unauthorized' });
 
-        const { rules, eligibility, gender, schedule } = req.body;
+        const { rules, eligibility, gender, schedule, requiresMusic, requiresPdf } = req.body;
 
         if (rules !== undefined) event.rules = rules;
         if (eligibility !== undefined) event.eligibility = eligibility;
         if (gender !== undefined) event.gender = gender;
         if (schedule !== undefined) event.schedule = schedule;
+        if (requiresMusic !== undefined) event.requiresMusic = requiresMusic;
+        if (requiresPdf !== undefined) event.requiresPdf = requiresPdf;
 
         await event.save();
         res.status(200).json({ message: 'Rules & Details updated', event });
@@ -491,28 +481,33 @@ export const getPublicEvents = async (req, res) => {
         if (req.query.eventType) filter.eventType = req.query.eventType;
         if (req.query.participationType) filter.participationType = req.query.participationType;
 
-        // For "live" status public view — show upcoming-live (date set, in future)
-        // Override for the live filter to show date-set future events
-        if (req.query.status === 'live') {
-            const now = new Date();
-            // Remove the filter we set and apply the correct one for public live view
-            delete filter.eventStartDate;
-            delete filter.$or;
-            filter.eventStartDate = { $ne: null, $gt: now };
-        }
-
         const [events, total] = await Promise.all([
             Event.find(filter)
-                .sort({ eventStartDate: 1, createdAt: -1 })
+                .sort({ registrationStart: 1, createdAt: -1 })
                 .skip(skip)
                 .limit(limit)
-                .select('-interestedStudents -rejectionReason')
+                .select('-rejectionReason')
                 .populate('coordinators', 'fullName profilePic'),
             Event.countDocuments(filter),
         ]);
 
+        const processedEvents = events.map(event => {
+            const eventObj = event.toObject();
+            if (req.user) {
+                eventObj.isInterested = event.interestedStudents.some(
+                    id => id.toString() === req.user._id.toString()
+                );
+            } else {
+                eventObj.isInterested = false;
+            }
+            // We can now remove interestedStudents from the response if we want to save bandwidth, 
+            // but we need it for calculating isInterested above.
+            delete eventObj.interestedStudents;
+            return eventObj;
+        });
+
         res.status(200).json({
-            events,
+            events: processedEvents,
             pagination: { total, page, limit, totalPages: Math.ceil(total / limit) },
         });
     } catch (error) {
@@ -556,25 +551,38 @@ export const showInterest = async (req, res) => {
         const event = await Event.findOne({ _id: id, isVerified: true });
         if (!event) return res.status(404).json({ message: 'Event not found' });
 
-        // Interest only makes sense for upcoming events (no date set yet)
-        if (event.eventStartDate !== null) {
-            return res.status(400).json({
-                message: 'Interest can only be shown for upcoming events (date not yet decided)',
+        // Check if user is onboarded
+        if (!req.user.isOnboarded) {
+            return res.status(403).json({
+                message: 'Please complete your profile (onboarding) before showing interest in events.'
             });
         }
 
-        const alreadyInterested = event.interestedStudents.some(
-            (s) => s.toString() === req.user._id.toString()
-        );
-        if (alreadyInterested) {
-            return res.status(409).json({ message: 'You have already shown interest' });
+        // Interest only makes sense for upcoming events (registration date not set yet)
+        if (event.registrationStart !== null) {
+            return res.status(400).json({
+                message: 'Interest can only be shown for upcoming events',
+            });
         }
 
-        event.interestedStudents.push(req.user._id);
+        const index = event.interestedStudents.findIndex(
+            (s) => s.toString() === req.user._id.toString()
+        );
+
+        let isInterested = false;
+        if (index === -1) {
+            event.interestedStudents.push(req.user._id);
+            isInterested = true;
+        } else {
+            event.interestedStudents.splice(index, 1);
+            isInterested = false;
+        }
+
         await event.save();
 
         res.status(200).json({
-            message: 'Interest recorded',
+            message: isInterested ? 'Interest recorded' : 'Interest removed',
+            isInterested,
             interestCount: event.interestedStudents.length,
         });
     } catch (error) {

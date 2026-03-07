@@ -1,5 +1,5 @@
 import express from 'express';
-import protectRoute, { requireRole } from '../middlewares/protectRoute.js';
+import protectRoute, { requireRole, optionalProtect } from '../middlewares/protectRoute.js';
 import {
     // Admin (admin + super-admin)
     createEventBasicInfo,
@@ -31,7 +31,7 @@ const router = express.Router();
 // ─────────────────────────────────────────────────────────────────────────────
 
 // GET /api/events?status=upcoming|live|past&category=Technical&page=1&limit=12
-router.get('/events', getPublicEvents);
+router.get('/events', optionalProtect, getPublicEvents);
 
 // GET /api/events/:slug
 router.get('/events/:slug', getPublicEventBySlug);

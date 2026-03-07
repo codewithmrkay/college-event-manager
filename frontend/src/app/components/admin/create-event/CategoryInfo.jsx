@@ -3,17 +3,27 @@ import { Tag, Check, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAdminEventStore } from '../../../store/adminEvent.store';
 
-const CategoryInfo = ({ draftEventId, onSaved }) => {
+const CategoryInfo = ({ draftEventId, onSaved, isCompleted }) => {
     // Only open if we have a draft event but haven't saved this section
     const [isOpen, setIsOpen] = useState(false);
     const [isSaved, setIsSaved] = useState(false);
     const [saving, setSaving] = useState(false);
-    const { updateEventCategory } = useAdminEventStore();
-
     const [formData, setFormData] = useState({
         category: '',
         eventType: ''
     });
+
+    const { updateEventCategory, currentEvent } = useAdminEventStore();
+
+    // Load existing data
+    React.useEffect(() => {
+        if (draftEventId && currentEvent && currentEvent._id === draftEventId) {
+            setFormData({
+                category: currentEvent.category || '',
+                eventType: currentEvent.eventType || ''
+            });
+        }
+    }, [draftEventId, currentEvent]);
 
     const handleSave = async () => {
         if (!formData.category || !formData.eventType) {
@@ -40,6 +50,8 @@ const CategoryInfo = ({ draftEventId, onSaved }) => {
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
+    const showCheck = isCompleted || isSaved;
+
     if (!draftEventId) return null; // Hide until basic info is created
 
     return (
@@ -51,9 +63,9 @@ const CategoryInfo = ({ draftEventId, onSaved }) => {
             />
 
             <div className="collapse-title flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isSaved ? 'bg-emerald-500' : 'bg-gray-300'
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${showCheck ? 'bg-emerald-500' : 'bg-gray-300'
                     }`}>
-                    {isSaved ? <Check className="w-5 h-5 text-white" strokeWidth={3} /> : <Tag className="w-5 h-5 text-white" />}
+                    {showCheck ? <Check className="w-5 h-5 text-white" strokeWidth={3} /> : <Tag className="w-5 h-5 text-white" />}
                 </div>
                 <div>
                     <h3 className="text-lg font-semibold">Category & Type</h3>

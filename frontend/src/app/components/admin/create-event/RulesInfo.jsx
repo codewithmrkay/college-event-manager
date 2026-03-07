@@ -3,7 +3,7 @@ import { BookOpen, Check, Loader2, Plus, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAdminEventStore } from '../../../store/adminEvent.store';
 
-const RulesInfo = ({ draftEventId, onSaved }) => {
+const RulesInfo = ({ draftEventId, onSaved, isCompleted }) => {
     const { updateEventRules, currentEvent } = useAdminEventStore();
 
     const [isOpen, setIsOpen] = useState(false);
@@ -13,11 +13,13 @@ const RulesInfo = ({ draftEventId, onSaved }) => {
     const [formData, setFormData] = useState({
         gender: 'All',
         rules: [],
-        eligibility: []
+        eligibility: [],
+        schedule: []
     });
 
     const [newRule, setNewRule] = useState('');
     const [newEligibility, setNewEligibility] = useState('');
+    const [newSchedule, setNewSchedule] = useState({ time: '', activity: '' });
 
     // Load existing data
     useEffect(() => {
@@ -25,11 +27,9 @@ const RulesInfo = ({ draftEventId, onSaved }) => {
             setFormData({
                 gender: currentEvent.gender || 'All',
                 rules: currentEvent.rules || [],
-                eligibility: currentEvent.eligibility || []
+                eligibility: currentEvent.eligibility || [],
+                schedule: currentEvent.schedule || []
             });
-            if (currentEvent.gender) {
-                setIsSaved(true);
-            }
         }
     }, [draftEventId, currentEvent]);
 
@@ -40,7 +40,8 @@ const RulesInfo = ({ draftEventId, onSaved }) => {
             await updateEventRules(draftEventId, {
                 gender: formData.gender,
                 rules: formData.rules,
-                eligibility: formData.eligibility
+                eligibility: formData.eligibility,
+                schedule: formData.schedule
             });
             setIsSaved(true);
             setIsOpen(false);
@@ -58,9 +59,16 @@ const RulesInfo = ({ draftEventId, onSaved }) => {
     };
 
     const addArrayItem = (field, value, setInput) => {
-        if (!value.trim()) return;
-        setFormData(prev => ({ ...prev, [field]: [value, ...prev[field]] }));
-        setInput('');
+        if (typeof value === 'string') {
+            if (!value.trim()) return;
+            setFormData(prev => ({ ...prev, [field]: [value, ...prev[field]] }));
+            setInput('');
+        } else {
+            // For schedule objects
+            if (!value.time.trim() || !value.activity.trim()) return;
+            setFormData(prev => ({ ...prev, [field]: [value, ...prev[field]] }));
+            setInput({ time: '', activity: '' });
+        }
     };
 
     const removeArrayItem = (field, index) => {
@@ -68,6 +76,8 @@ const RulesInfo = ({ draftEventId, onSaved }) => {
         newArr.splice(index, 1);
         setFormData(prev => ({ ...prev, [field]: newArr }));
     };
+
+    const showCheck = isCompleted || isSaved;
 
     if (!draftEventId) return null;
 
@@ -80,8 +90,8 @@ const RulesInfo = ({ draftEventId, onSaved }) => {
             />
 
             <div className="collapse-title flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isSaved ? 'bg-emerald-500' : 'bg-gray-300'}`}>
-                    {isSaved ? <Check className="w-5 h-5 text-white" strokeWidth={3} /> : <BookOpen className="w-5 h-5 text-white" />}
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${showCheck ? 'bg-emerald-500' : 'bg-gray-300'}`}>
+                    {showCheck ? <Check className="w-5 h-5 text-white" strokeWidth={3} /> : <BookOpen className="w-5 h-5 text-white" />}
                 </div>
                 <div>
                     <h3 className="text-lg font-semibold">Rules & Details</h3>
@@ -179,6 +189,65 @@ const RulesInfo = ({ draftEventId, onSaved }) => {
                                         <span className="flex-1 font-medium text-gray-700">{rule}</span>
                                         <button
                                             onClick={() => removeArrayItem('rules', index)}
+                                            className="btn btn-sm btn-ghost text-red-500 hover:bg-red-50 p-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="form-control">
+                        <label className="label">
+                            <span className="label-text font-medium text-base">Event Schedule</span>
+                        </label>
+                        <div className="flex flex-col gap-3">
+                            {/* New Schedule Item Input at Top */}
+                            <div className="flex flex-col md:flex-row gap-2 bg-blue-50/20 p-4 border-2 border-dashed border-blue-200 rounded-xl">
+                                <div className="flex-1">
+                                    <label className="label py-1"><span className="label-text-alt font-semibold text-blue-600 uppercase">Time</span></label>
+                                    <input
+                                        type="text"
+                                        className="input font-semibold input-md w-full border-2 border-gray-300 focus:border-blue-500 focus:outline-none"
+                                        value={newSchedule.time}
+                                        onChange={(e) => setNewSchedule(prev => ({ ...prev, time: e.target.value }))}
+                                        placeholder="e.g. 10:00 AM"
+                                    />
+                                </div>
+                                <div className="flex-[2]">
+                                    <label className="label py-1"><span className="label-text-alt font-semibold text-blue-600 uppercase">Activity</span></label>
+                                    <input
+                                        type="text"
+                                        className="input font-semibold input-md w-full border-2 border-gray-300 focus:border-blue-500 focus:outline-none"
+                                        value={newSchedule.activity}
+                                        onChange={(e) => setNewSchedule(prev => ({ ...prev, activity: e.target.value }))}
+                                        placeholder="e.g. Opening Ceremony"
+                                        onKeyDown={(e) => e.key === 'Enter' && addArrayItem('schedule', newSchedule, setNewSchedule)}
+                                    />
+                                </div>
+                                <div className="flex items-end">
+                                    <button
+                                        onClick={() => addArrayItem('schedule', newSchedule, setNewSchedule)}
+                                        className="btn btn-md bg-blue-500 hover:bg-blue-600 text-white border-none px-6"
+                                    >
+                                        <Plus className="w-5 h-5" /> Add
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* List of existing schedule items */}
+                            <div className="flex flex-col gap-2 mt-2">
+                                {formData.schedule.map((item, index) => (
+                                    <div key={`sc-${index}`} className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-lg group shadow-sm hover:shadow-md transition-all">
+                                        <div className="flex flex-col">
+                                            <span className="text-xs font-bold text-blue-500 uppercase tracking-wider">{item.time}</span>
+                                            <span className="font-semibold text-gray-800 text-lg">{item.activity}</span>
+                                        </div>
+                                        <div className="flex-1"></div>
+                                        <button
+                                            onClick={() => removeArrayItem('schedule', index)}
                                             className="btn btn-sm btn-ghost text-red-500 hover:bg-red-50 p-2 opacity-0 group-hover:opacity-100 transition-opacity"
                                         >
                                             <Trash2 className="w-4 h-4" />
