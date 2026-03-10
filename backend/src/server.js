@@ -15,10 +15,9 @@ const port = process.env.PORT || 3000
 
 //----------------------------------------- middleware
 app.use(cors({
-    origin: [
-        'http://localhost:5173',
-        'https://chrome-web-store.vercel.app',
-    ],
+    origin: process.env.NODE_ENV === 'production'
+        ? process.env.FRONTEND_URL
+        : 'http://localhost:5173',
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true

@@ -226,9 +226,9 @@ export const login = async (req, res) => {
 export const googleAuthCallback = async (req, res) => {
     try {
         const user = req.user;   // passport put this here
-
+        const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173"; // Fallback to localhost
         if (!user) {
-            return res.redirect("http://localhost:5173/login?error=auth_failed");
+            return res.redirect(`${frontendUrl}/login?error=auth_failed`);
         }
 
         // Generate JWT
@@ -240,14 +240,16 @@ export const googleAuthCallback = async (req, res) => {
         // Redirect to frontend
         // isOnboarded tells frontend whether to show onboarding or dashboard
         if (!user.isOnboarded) {
-            res.redirect("http://localhost:5173/profile");
+            return res.redirect(`${frontendUrl}`);
+            // res.redirect("http://localhost:5173/profile");
         } else {
-            res.redirect("http://localhost:5173/");
+            res.redirect(`${frontendUrl}`);
         }
 
     } catch (error) {
         console.log("Error in googleAuthCallback:", error);
-        res.redirect("http://localhost:5173/login?error=server_error");
+        res.redirect(`${frontendUrl}/login?error=server_error`);
+        // res.redirect("http://localhost:5173/login?error=server_error");
     }
 };
 
