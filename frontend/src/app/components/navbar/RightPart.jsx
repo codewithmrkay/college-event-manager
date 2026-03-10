@@ -14,7 +14,7 @@ export const LoginBtn = () => {
         Apply an Event
       </button>
       <div>
-        <ProfileBtn />
+        <ProfileBtn/>
       </div>
     </div>
   );
