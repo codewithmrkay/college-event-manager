@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserStore } from '../../store/user.store';
-export const ProfileBtn = () => {
-    const navigate = useNavigate();
+
+const ProfileBtn = () => {
+  const navigate = useNavigate();
     const { user, loading, getProfile } = useUserStore();
 
     const [isChecking, setIsChecking] = useState(true);
@@ -62,4 +63,6 @@ export const ProfileBtn = () => {
             Sign In
         </button>
     );
-};
+}
+
+export default ProfileBtn
