@@ -190,6 +190,21 @@ export const useAdminEventStore = create((set, get) => ({
         }
     },
 
+    deleteEvent: async (id) => {
+        try {
+            set({ loading: true, error: null });
+            await import('../services/admin.services').then(m => m.deleteEventApi(id));
+            set((state) => ({
+                events: state.events.filter((ev) => ev._id !== id),
+                loading: false
+            }));
+            return true;
+        } catch (error) {
+            set({ error: error.response?.data?.message || "Deletion failed", loading: false });
+            throw error;
+        }
+    },
+
     resetCurrentEvent: () => {
         set({ currentEvent: null });
     }

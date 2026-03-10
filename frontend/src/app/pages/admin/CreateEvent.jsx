@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useParams, useSearchParams } from 'react-router-dom';
 import BasicInfo from '../../components/admin/create-event/BasicInfo';
 import CategoryInfo from '../../components/admin/create-event/CategoryInfo';
 import ParticipationInfo from '../../components/admin/create-event/ParticipationInfo';
@@ -11,8 +12,22 @@ import EventCreationCard from '../../components/admin/create-event/EventCreation
 import { useAdminEventStore } from '../../store/adminEvent.store';
 
 export const CreateEvent = () => {
-    const { currentEvent } = useAdminEventStore();
+    const { idOrSlug } = useParams();
+    const [searchParams] = useSearchParams();
+    const draftId = searchParams.get('draftId');
+    const targetId = idOrSlug || draftId;
+
+    const { currentEvent, fetchEventById, resetCurrentEvent } = useAdminEventStore();
     const [draftEventId, setDraftEventId] = useState(null);
+
+    useEffect(() => {
+        if (targetId) {
+            fetchEventById(targetId);
+        } else {
+            resetCurrentEvent();
+        }
+        return () => resetCurrentEvent();
+    }, [targetId, fetchEventById, resetCurrentEvent]);
 
     // Track steps explicitly saved in sessionStorage (scoped to draft ID)
     // This survives Zustand store updates and page reloads for the same draft
@@ -91,7 +106,7 @@ export const CreateEvent = () => {
         <div className='flex flex-col lg:flex-row w-full min-h-screen items-start py-4 bg-base-300 gap-6'>
             {/* Sticky Sidebar / Tracking Card */}
             <div className='w-full lg:w-1/2 lg:sticky top-0 z-5 h-fit lg:h-screen flex items-center justify-center'>
-                <EventCreationCard draftEventId={draftEventId} completedSteps={completedSteps} />
+                <EventCreationCard draftEventId={draftEventId} completedSteps={completedSteps} currentEvent={currentEvent} />
             </div>
 
             {/* Scrollable Form Chunks */}

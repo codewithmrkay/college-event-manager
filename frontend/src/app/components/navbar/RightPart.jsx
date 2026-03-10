@@ -6,7 +6,7 @@ export const LoginBtn = () => {
   const navigate = useNavigate();
 
   const handleLogin = () => {
-    navigate('/login');
+    navigate('/signin');
   };
   return (
     <div className=' flex items-center justify-center gap-2'>

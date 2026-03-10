@@ -73,3 +73,8 @@ export const submitEventApi = async (id) => {
     const { data } = await api.post(`/admin/events/${id}/submit`);
     return data;
 };
+
+export const deleteEventApi = async (id) => {
+    const { data } = await api.delete(`/admin/events/${id}`);
+    return data;
+};

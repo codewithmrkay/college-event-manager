@@ -54,6 +54,7 @@ const router = createBrowserRouter([
       { path: "/admin/events", element: <AdminEventList /> },
       { path: "/admin/events/verify", element: <SuperAdminVerifyList /> },
       { path: "/admin/events/create", element: <CreateEvent /> },
+      { path: "/admin/events/edit/:idOrSlug", element: <CreateEvent /> },
       { path: "/admin/events/:idOrSlug", element: <EventDetails /> },
     ],
   },

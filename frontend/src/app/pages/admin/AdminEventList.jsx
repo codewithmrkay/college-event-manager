@@ -78,7 +78,7 @@ export const AdminEventList = () => {
                     <input
                         type="text"
                         placeholder="Search your events..."
-                        className={`input font-semibold input-lg w-full border-2 focus:border-blue-500 focus:outline-none`} 
+                        className={`input font-semibold input-lg w-full border-2 focus:border-blue-500 focus:outline-none`}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
@@ -157,19 +157,23 @@ export const AdminEventList = () => {
                                                     <Eye className="w-5 h-5" />
                                                 </button>
                                                 <Link
-                                                    to={event.isDraft ? `/admin/events/create?draftId=${event._id}` : `/admin/events/edit/${event._id}`}
+                                                    to={`/admin/events/edit/${event._id}`}
                                                     className="btn btn-ghost btn-sm  hover:bg-green-50 hover:text-green-600"
                                                     title="Edit"
                                                 >
                                                     <Edit3 className="w-5 h-5" />
                                                 </Link>
-                                                <Link
-                                                    to={event.isDraft ? `/admin/events/delete?draftId=${event._id}` : `/admin/events/edit/${event._id}`}
+                                                <button
+                                                    onClick={async () => {
+                                                        if (window.confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
+                                                            await import('../../store/adminEvent.store').then(m => m.useAdminEventStore.getState().deleteEvent(event._id));
+                                                        }
+                                                    }}
                                                     className="btn btn-ghost btn-sm  hover:bg-amber-50"
-                                                    title="Edit"
+                                                    title="Delete"
                                                 >
                                                     <Trash2 className="w-5 h-5 text-red-500" />
-                                                </Link>
+                                                </button>
 
                                             </div>
                                         </td>
