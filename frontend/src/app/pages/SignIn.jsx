@@ -66,7 +66,7 @@ export const SignIn = () => {
 
     const handleGoogleAuth = () => {
         const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        window.location.href = `${apiUrl}/api/auth/google`;
+        window.location.href = `${apiUrl}/auth/google`;
     };
 
     const handleSignUpRedirect = () => {
