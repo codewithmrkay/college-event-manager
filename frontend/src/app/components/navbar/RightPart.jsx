@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ProfileBtn from '../common/profileBtn';
+import ProfileBtn from '../common/ProfileBtn';
 
 export const LoginBtn = () => {
   const navigate = useNavigate();
