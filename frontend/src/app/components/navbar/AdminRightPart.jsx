@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import ProfileBtn from '../common/ProfileBtn';
+import ProfileBtn from '../common/profileBtn';
 export const AdminRightPart = () => {
     const navigate = useNavigate();
 
