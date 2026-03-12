@@ -10,7 +10,8 @@ import {
     Clock,
     AlertCircle,
     CheckCircle2,
-    Trash2
+    Trash2,
+    Users
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAdminEventStore } from '../../store/adminEvent.store';
@@ -156,6 +157,13 @@ export const AdminEventList = () => {
                                                 >
                                                     <Eye className="w-5 h-5" />
                                                 </button>
+                                                <Link
+                                                    to={`/admin/events/${event._id}/participants`}
+                                                    className="btn btn-ghost btn-sm hover:bg-purple-50 hover:text-purple-600"
+                                                    title="Participants"
+                                                >
+                                                    <Users className="w-5 h-5" />
+                                                </Link>
                                                 <Link
                                                     to={`/admin/events/edit/${event._id}`}
                                                     className="btn btn-ghost btn-sm  hover:bg-green-50 hover:text-green-600"

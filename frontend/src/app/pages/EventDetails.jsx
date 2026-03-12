@@ -3,10 +3,12 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import {
     Calendar, MapPin, Users, Ticket,
     Award, Shield, Clock, Info,
-    User, Mail, ArrowLeft, RefreshCw
+    User, Mail, ArrowLeft, RefreshCw,
+    CheckCircle, XCircle, Loader2
 } from 'lucide-react';
 import { useAdminEventStore } from '../store/adminEvent.store';
-import { getPublicEventBySlug } from '../services/event.services';
+import { getPublicEventBySlug, applyToEvent, getMyApplications } from '../services/event.services';
+import { useUserStore } from '../store/user.store';
 import toast from 'react-hot-toast';
 
 const EventDetails = () => {
@@ -18,7 +20,11 @@ const EventDetails = () => {
 
     const [event, setEvent] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [applying, setApplying] = useState(false);
+    const [myRegistration, setMyRegistration] = useState(null); // null | registration object
+    const [authChecked, setAuthChecked] = useState(false);
     const { fetchEventById } = useAdminEventStore();
+    const { user, loading: authLoading, getProfile } = useUserStore();
 
     const loadEventData = async () => {
         setLoading(true);
@@ -38,9 +44,131 @@ const EventDetails = () => {
         }
     };
 
+    // Check if the logged-in student has already applied to this event
+    const checkMyRegistration = async (eventId) => {
+        if (!user || isPreview) return;
+        try {
+            const { registrations } = await getMyApplications();
+            const found = registrations.find(
+                (r) => r.event?._id === eventId || r.event === eventId
+            );
+            setMyRegistration(found || null);
+        } catch {
+            // silently fail — not critical
+        }
+    };
+
     useEffect(() => {
         loadEventData();
     }, [idOrSlug, isPreview]);
+
+    // Resolve auth state once after mount if not yet known
+    useEffect(() => {
+        const resolveAuth = async () => {
+            if (!user && !authLoading) {
+                await getProfile();
+            }
+            setAuthChecked(true);
+        };
+        resolveAuth();
+    }, []);
+
+    useEffect(() => {
+        if (event?._id) {
+            checkMyRegistration(event._id);
+        }
+    }, [event, user]);
+
+    const handleApply = async () => {
+        // If auth is still resolving, wait for it first
+        if (!authChecked || authLoading) {
+            return;
+        }
+        if (!user) {
+            toast.error('Please sign in to apply for events');
+            navigate('/signin');
+            return;
+        }
+        setApplying(true);
+        try {
+            const res = await applyToEvent(event._id);
+            toast.success(res.message || 'Successfully applied!');
+            // Refresh registration state
+            await checkMyRegistration(event._id);
+        } catch (error) {
+            const msg = error.response?.data?.message || 'Failed to apply. Please try again.';
+            toast.error(msg);
+        } finally {
+            setApplying(false);
+        }
+    };
+
+    // Determine the Register button state
+    const getRegisterButton = () => {
+        if (!event) return null;
+
+        // Auth still loading — show spinner to avoid flicker
+        if (!authChecked || authLoading) {
+            return (
+                <button disabled className="btn btn-lg btn-primary rounded-2xl px-12 text-lg opacity-60 cursor-not-allowed">
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                </button>
+            );
+        }
+
+        // Already applied (active)
+        if (myRegistration && myRegistration.status !== 'cancelled') {
+            return (
+                <button
+                    disabled
+                    className="btn btn-lg rounded-2xl px-10 text-lg bg-green-500 text-white border-none cursor-not-allowed flex items-center gap-2"
+                >
+                    <CheckCircle className="w-5 h-5" />
+                    Applied ✓
+                </button>
+            );
+        }
+
+        // Registration closed
+        if (!event.isRegistrationOpen) {
+            return (
+                <button
+                    disabled
+                    className="btn btn-lg rounded-2xl px-10 text-lg bg-gray-300 text-gray-500 border-none cursor-not-allowed"
+                >
+                    Registration Closed
+                </button>
+            );
+        }
+
+        // Full
+        if (event.maxParticipants && event.currentParticipants >= event.maxParticipants) {
+            return (
+                <button
+                    disabled
+                    className="btn btn-lg rounded-2xl px-10 text-lg bg-red-100 text-red-500 border-none cursor-not-allowed"
+                >
+                    <XCircle className="w-5 h-5 mr-2" />
+                    Event Full
+                </button>
+            );
+        }
+
+        // Default: register
+        return (
+            <button
+                onClick={handleApply}
+                disabled={applying}
+                className="btn btn-lg btn-primary rounded-2xl px-12 text-lg shadow-2xl shadow-purple-500/30 hover:scale-105 transition-transform disabled:opacity-70 disabled:scale-100"
+            >
+                {applying ? (
+                    <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Applying...</>
+                ) : (
+                    'Register Now'
+                )}
+            </button>
+        );
+    };
 
     if (loading) {
         return (
@@ -143,9 +271,9 @@ const EventDetails = () => {
                             </div>
                         </div>
                         {!isPreview && (
-                            <button className="btn btn-lg btn-primary rounded-2xl px-12 text-lg shadow-2xl shadow-purple-500/30 hover:scale-105 transition-transform">
-                                Register Now
-                            </button>
+                            <div className="flex-shrink-0">
+                                {getRegisterButton()}
+                            </div>
                         )}
                     </div>
                 </div>
@@ -237,7 +365,7 @@ const EventDetails = () => {
                                 <div>
                                     <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-0.5">Capacity</p>
                                     <p className="text-lg font-bold text-gray-800">
-                                        {event.maxParticipants ? `${event.maxParticipants} slots total` : "Unlimited slots"}
+                                        {event.maxParticipants ? `${event.currentParticipants || 0}/${event.maxParticipants} slots` : "Unlimited slots"}
                                     </p>
                                     <p className="text-xs text-gray-500 font-medium">Participation: {event.participationType}</p>
                                     {event.participationType === 'Team' && (
@@ -277,6 +405,13 @@ const EventDetails = () => {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Register button in sidebar for mobile convenience */}
+                        {!isPreview && (
+                            <div className="pt-2">
+                                {getRegisterButton()}
+                            </div>
+                        )}
                     </div>
 
                     {/* Coordinators Card */}

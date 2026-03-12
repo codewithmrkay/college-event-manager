@@ -14,6 +14,7 @@ export const getPublicEvents = async (params) => {
 // Get single public event by slug
 export const getPublicEventBySlug = async (slug) => {
     const res = await api.get(`/events/${slug}`);
+    console.log(slug)
     return res.data;
 };
 
@@ -120,3 +121,45 @@ export const verifyEvent = async (id, data) => {
     const res = await api.patch(`/admin/events/${id}/verify`, data);
     return res.data;
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  REGISTRATION SERVICES (Student)
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Apply to an event
+export const applyToEvent = async (eventId) => {
+    const res = await api.post(`/events/${eventId}/apply`);
+    return res.data;
+};
+
+// Get student's own applications
+export const getMyApplications = async () => {
+    const res = await api.get('/registrations/my');
+    return res.data;
+};
+
+// Cancel an application
+export const cancelApplication = async (registrationId) => {
+    const res = await api.delete(`/registrations/${registrationId}/cancel`);
+    return res.data;
+};
+
+// ─── Admin Registration Services ─────────────────────────────────────────────
+
+/**
+ * Admin: Fetch all participants for an event
+ */
+export const getEventParticipants = async (eventId) => {
+    const res = await api.get(`/admin/events/${eventId}/participants`);
+    return res.data;
+};
+
+/**
+ * Admin: Mark attendance for a student
+ */
+export const markAttendance = async (registrationId, attended) => {
+    const res = await api.patch(`/admin/registrations/${registrationId}/attendance`, { attended });
+    return res.data;
+};
+
+

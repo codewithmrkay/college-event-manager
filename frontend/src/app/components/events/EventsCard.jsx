@@ -33,6 +33,7 @@ const EventsCard = () => {
 
   const displayEvents = events.map(backendEvent => ({
     id: backendEvent._id,
+    slug: backendEvent.slug,
     title: backendEvent.title || 'Untitled Event',
     category: backendEvent.category || 'General',
     themes: [backendEvent.category, backendEvent.eventType].filter(Boolean),
@@ -114,7 +115,8 @@ const EventsCard = () => {
             {displayEvents.map((event) => (
               <div
                 key={event.id}
-                className="bg-white rounded-lg border-2 p-4 border-gray-300 hover:border-blue-500 transition-all"
+                onClick={() => window.open(`/events/${event.slug || event.id}`, '_blank', 'noopener,noreferrer')}
+                className="bg-white rounded-lg border-2 p-4 border-gray-300 hover:border-blue-500 cursor-pointer transition-all shadow-sm hover:shadow-md"
               >
                 {/* Header with title and social links */}
                 <div className="flex justify-between items-start mb-4">
@@ -130,6 +132,9 @@ const EventsCard = () => {
                     {event.socialLinks.map((link, idx) => (
                       <button
                         key={idx}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
                         aria-label={link.label}
                         className="cursor-pointer p-2 border-2 border-blue-100 hover:border-blue-500 rounded-full bg-gray-50 hover:bg-blue-50 transition-colors"
                       >
@@ -205,7 +210,10 @@ const EventsCard = () => {
                 {/* Apply / Like Button */}
                 {activeFilter === 'upcoming' ? (
                   <button
-                    onClick={() => handleToggleInterest(event.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleToggleInterest(event.id);
+                    }}
                     className={`w-full btn border-2 text-xl font-semibold py-2 flex items-center justify-center gap-2 rounded-xl transition-colors ${event.isInterested
                       ? 'bg-red-500 border-red-500 text-white'
                       : 'border-red-500 text-red-500 hover:bg-red-50'
@@ -215,8 +223,14 @@ const EventsCard = () => {
                     {event.isInterested ? 'Interested' : 'Show Interest'}
                   </button>
                 ) : (
-                  <button className="w-full btn btn-secondary text-xl text-white py-2 rounded-xl font-semibold">
-                    Apply now
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(`/events/${event.slug || event.id}`, '_blank', 'noopener,noreferrer');
+                    }}
+                    className="w-full btn btn-secondary text-xl text-white py-2 rounded-xl font-semibold"
+                  >
+                    View Details & Apply
                   </button>
                 )}
               </div>

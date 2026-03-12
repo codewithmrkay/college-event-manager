@@ -240,7 +240,7 @@ export const googleAuthCallback = async (req, res) => {
         // Redirect to frontend
         // isOnboarded tells frontend whether to show onboarding or dashboard
         if (!user.isOnboarded) {
-            return res.redirect(`${frontendUrl}`);
+            return res.redirect(`${frontendUrl}/profile`);
             // res.redirect("http://localhost:5173/profile");
         } else {
             res.redirect(`${frontendUrl}`);

@@ -6,7 +6,7 @@ export const LoginBtn = ({ isMobile }) => {
   const navigate = useNavigate();
 
   const handleLogin = () => {
-    navigate('/signin');
+    navigate('/events');
   };
   return (
     <div className='flex items-center justify-center gap-2'>

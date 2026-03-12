@@ -3,8 +3,18 @@ import { Navbar } from "../components/navbar/Navbar";
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
+import { useUserStore } from "../store/user.store";
+
 export const AppLayout = () => {
   const location = useLocation();
+  const { getProfile, user, loading } = useUserStore();
+
+  // Bootstrap auth from cookie on every app load
+  useEffect(() => {
+    if (!user) {
+      getProfile();
+    }
+  }, []);
 
   useEffect(() => {
     toast.dismiss();

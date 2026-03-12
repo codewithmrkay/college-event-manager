@@ -16,6 +16,7 @@ import { AdminDashboard } from "../pages/admin/AdminDashboard";
 import { AdminEventList } from "../pages/admin/AdminEventList";
 import { SuperAdminVerifyList } from "../pages/admin/SuperAdminVerifyList";
 import { CreateEvent } from "../pages/admin/CreateEvent";
+import { EventParticipants } from "../pages/admin/EventParticipants";
 import EventDetails from "../pages/EventDetails";
 
 const router = createBrowserRouter([
@@ -55,6 +56,7 @@ const router = createBrowserRouter([
       { path: "/admin/events/verify", element: <SuperAdminVerifyList /> },
       { path: "/admin/events/create", element: <CreateEvent /> },
       { path: "/admin/events/edit/:idOrSlug", element: <CreateEvent /> },
+      { path: "/admin/events/:idOrSlug/participants", element: <EventParticipants /> },
       { path: "/admin/events/:idOrSlug", element: <EventDetails /> },
     ],
   },
