@@ -58,8 +58,8 @@ export const Dashboard = () => {
 
   if (isChecking || (loading && events.length === 0)) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <span className="loading loading-spinner loading-lg text-primary"></span>
+      <div className="flex w-full items-center justify-center min-h-screen">
+        <span className="loading loading-spinner loading-xl text-primary"></span>
       </div>
     );
   }
@@ -69,7 +69,7 @@ export const Dashboard = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500 py-10 px-4 sm:px-6 lg:px-8">
+    <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500 py-10">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -93,13 +93,13 @@ export const Dashboard = () => {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {stats.map((stat, idx) => (
-          <div key={idx} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+          <div key={idx} className="bg-white p-6 rounded-md border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-sm font-bold text-gray-400 uppercase tracking-wider">{stat.label}</p>
                 <h3 className="text-4xl font-mangodolly font-black text-gray-800 mt-2">{stat.value}</h3>
               </div>
-              <div className={`${stat.bg} ${stat.color} p-4 rounded-2xl`}>
+              <div className={`${stat.bg} ${stat.color} p-4 rounded-md`}>
                 <stat.icon className="w-8 h-8" />
               </div>
             </div>
@@ -121,7 +121,7 @@ export const Dashboard = () => {
               </div>
               <div className="grid grid-cols-1 gap-4">
                 {interestedEvents.map((event) => (
-                  <Link key={event._id} to={`/events/${event.slug}`} className="bg-white border p-4 border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-all group flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                  <Link key={event._id} to={`/events/${event.slug}`} className="bg-white border p-4 border-gray-100 rounded-md shadow-sm hover:shadow-md transition-all group flex flex-col sm:flex-row items-start sm:items-center gap-4">
                     <div className="h-24 w-full sm:w-40 aspect-video rounded-xl bg-gray-100 overflow-hidden flex-shrink-0">
                       {event.bannerImage ? (
                         <img src={event.bannerImage} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
@@ -164,11 +164,11 @@ export const Dashboard = () => {
 
           {/* Discover Events */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between px-2">
-              <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                <Star className="w-6 h-6 text-yellow-500 fill-yellow-500" /> Discover Events
+            <div className="flex items-center justify-between">
+              <h2 className="text-3xl font-sans font-bold text-gray-800 flex items-center">
+                Discover Events
               </h2>
-              <Link to="/events" className="text-sm font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1">
+              <Link to="/events" className="text-xl font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1">
                 View All <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
@@ -176,7 +176,7 @@ export const Dashboard = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {discoverEvents.length > 0 ? (
                 discoverEvents.map((event) => (
-                  <Link key={event._id} to={`/events/${event.slug}`} className="bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden group flex flex-col h-full">
+                  <Link key={event._id} to={`/events/${event.slug}`} className="bg-white border border-gray-100 rounded-md shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden group flex flex-col h-full">
                     <div className="h-40 w-full bg-gray-100 overflow-hidden relative flex-shrink-0">
                       {event.bannerImage ? (
                         <img src={event.bannerImage} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
@@ -186,7 +186,7 @@ export const Dashboard = () => {
                         </div>
                       )}
                       <div className="absolute top-3 left-3">
-                        <span className="px-3 py-1 bg-white/90 backdrop-blur-sm shadow-sm rounded-full text-xs font-bold text-gray-700 uppercase tracking-wider">
+                        <span className="px-3 py-1 bg-white/90 backdrop-blur-sm shadow-sm rounded-full text-xs font-bold text-gray-900 uppercase tracking-wider">
                           {event.category}
                         </span>
                       </div>
@@ -208,7 +208,7 @@ export const Dashboard = () => {
                   </Link>
                 ))
               ) : (
-                <div className="col-span-1 sm:col-span-2 p-12 text-center bg-white border border-gray-100 rounded-2xl">
+                <div className="col-span-1 sm:col-span-2 p-12 text-center bg-white border border-gray-100 rounded-md">
                   <div className="bg-gray-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                     <LayoutDashboard className="w-8 h-8 text-gray-400" />
                   </div>
@@ -225,7 +225,7 @@ export const Dashboard = () => {
         {/* Right Column - Profile status & Tips */}
         <div className="space-y-6">
           {!user?.isOnboarded ? (
-            <div className="bg-gradient-to-br from-pink-500 to-rose-600 p-6 rounded-2xl text-white shadow-xl relative overflow-hidden">
+            <div className="bg-gradient-to-br from-pink-500 to-rose-600 p-6 rounded-md text-white shadow-xl relative overflow-hidden">
               <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
               <h3 className="font-bold text-2xl mb-2 relative z-10">Complete Your Profile!</h3>
               <p className="text-pink-100 text-md leading-relaxed mb-6 relative z-10">
@@ -236,7 +236,7 @@ export const Dashboard = () => {
               </Link>
             </div>
           ) : !user?.isVerified ? (
-            <div className="bg-gradient-to-br from-amber-500 to-orange-600 p-6 rounded-2xl text-white shadow-xl relative overflow-hidden">
+            <div className="bg-gradient-to-br from-amber-500 to-orange-600 p-6 rounded-md text-white shadow-xl relative overflow-hidden">
               <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
               <h3 className="font-bold text-2xl mb-2 relative z-10 flex items-center gap-2">
                 <AlertCircle className="w-6 h-6" /> Profile Pending
@@ -246,7 +246,7 @@ export const Dashboard = () => {
               </p>
             </div>
           ) : (
-            <div className="bg-gradient-to-br from-blue-600 to-indigo-700 p-6 rounded-2xl text-white shadow-xl relative overflow-hidden">
+            <div className="bg-gradient-to-br from-blue-600 to-indigo-700 p-6 rounded-md text-white shadow-xl relative overflow-hidden">
               <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
               <h3 className="font-bold text-2xl mb-2 relative z-10 flex items-center gap-2">
                 <CheckCircle className="w-6 h-6 text-blue-200" /> Account Verified
@@ -265,21 +265,22 @@ export const Dashboard = () => {
                   </p>
                 </div>
               </div>
+              
             </div>
           )}
 
-          <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+          <div className="bg-white p-6 rounded-md border border-gray-100 shadow-sm">
             <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2 text-xl">
               <LayoutDashboard className="w-5 h-5 text-blue-500" /> Quick Links
             </h3>
             <div className="space-y-3">
-              <Link to="/events" className="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 group transition-colors border border-transparent hover:border-gray-100">
+              <Link to="/events" className="flex items-center justify-between btn btn-lg">
                 <span className="font-bold text-gray-700 group-hover:text-blue-600 transition-colors">Browse All Events</span>
                 <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
               </Link>
-              <Link to="/profile" className="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 group transition-colors border border-transparent hover:border-gray-100">
-                <span className="font-bold text-gray-700 group-hover:text-amber-600 transition-colors">My Profile</span>
-                <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-amber-600 group-hover:translate-x-1 transition-all" />
+              <Link to="/profile" className="flex items-center justify-between btn btn-lg btn-secondary text-white">
+                <span className="font-bold  ">My Profile</span>
+                <ChevronRight className="w-4 h-4  " />
               </Link>
             </div>
           </div>

@@ -103,20 +103,20 @@ const EventsCard = () => {
   };
 
   return (
-    <section className="w-full py-5 px-4 md:px-8">
+    <section className="w-full py-5">
       <div className="max-w-6xl mx-auto">
         <FilterEvents activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
         {loading ? (
-          <div className="flex justify-center p-8"><span className="text-gray-500">Loading events...</span></div>
+          <div className="flex justify-center items-center h-screen "><span className="text-gray-500 font-mangodolly text-2xl">Loading events...</span></div>
         ) : displayEvents.length === 0 ? (
-          <div className="flex justify-center p-8"><span className="text-gray-500">No {activeFilter} events found.</span></div>
+          <div className="flex justify-center items-center h-screen "><span className="text-gray-500 font-mangodolly text-2xl">No {activeFilter} events found.</span></div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-screen">
             {displayEvents.map((event) => (
               <div
                 key={event.id}
                 onClick={() => window.open(`/events/${event.slug || event.id}`, '_blank', 'noopener,noreferrer')}
-                className="bg-white rounded-lg border-2 p-4 border-gray-300 hover:border-blue-500 cursor-pointer transition-all shadow-sm hover:shadow-md"
+                className="bg-white h-fit rounded-lg border-2 p-4 border-gray-300 hover:border-blue-500 cursor-pointer transition-all shadow-sm hover:shadow-md"
               >
                 {/* Header with title and social links */}
                 <div className="flex justify-between items-start mb-4">
@@ -228,7 +228,7 @@ const EventsCard = () => {
                       e.stopPropagation();
                       window.open(`/events/${event.slug || event.id}`, '_blank', 'noopener,noreferrer');
                     }}
-                    className="w-full btn btn-secondary text-xl text-white py-2 rounded-xl font-semibold"
+                    className="w-full btn btn-secondary text-xl text-white py-2 font-semibold"
                   >
                     View Details & Apply
                   </button>

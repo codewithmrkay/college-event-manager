@@ -46,11 +46,11 @@ const ApplicationCard = ({ registration, onCancel, cancelling }) => {
   };
 
   return (
-    <div className={`bg-white rounded-3xl border shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl ${status === 'cancelled' ? 'opacity-60 grayscale' : ''}`}>
+    <div className={`bg-white rounded-md border-2 border-gray-200 shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl ${status === 'cancelled' ? 'opacity-60 grayscale' : ''}`}>
       {/* Banner */}
       <div className="relative h-36 w-full overflow-hidden">
         {event?.bannerImage ? (
-          <img src={event.bannerImage} alt={event.title} className="w-full h-full object-cover" />
+          <img src={event.bannerImage} alt={event.title} className="hover:scale-105 transition-all duration-300 w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center p-4">
             <p className="text-white font-black text-xl text-center drop-shadow">{event?.title}</p>
@@ -63,7 +63,7 @@ const ApplicationCard = ({ registration, onCancel, cancelling }) => {
         {/* Category */}
         {event?.category && (
           <div className="absolute top-3 left-3">
-            <span className="px-2.5 py-1 bg-black/40 backdrop-blur-sm rounded-full text-white text-[10px] font-bold uppercase tracking-wider">
+            <span className="px-2.5 py-1 bg-white backdrop-blur-sm text-xs rounded-full text-gray-500 font-bold uppercase tracking-wider">
               {event.category}
             </span>
           </div>
@@ -107,7 +107,7 @@ const ApplicationCard = ({ registration, onCancel, cancelling }) => {
         <div className="flex gap-2 pt-1">
           <button
             onClick={() => navigate(`/events/${event?.slug || event?._id}`)}
-            className="flex-1 btn btn-sm btn-ghost border border-gray-200 rounded-xl text-gray-600 hover:bg-purple-50 hover:text-purple-600 hover:border-purple-200 flex items-center justify-center gap-1 font-semibold"
+            className="flex-1 btn btn-md  flex items-center justify-center gap-1"
           >
             View Event <ArrowRight className="w-3.5 h-3.5" />
           </button>
@@ -201,33 +201,30 @@ export const Applications = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen pt-10  w-full">
       {/* Page Header */}
-      <div className="bg-gradient-to-br from-purple-600 via-purple-700 to-blue-700 text-white px-6 py-12">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2.5 bg-white/20 backdrop-blur rounded-xl">
-              <FileText className="w-6 h-6" />
-            </div>
-            <h1 className="text-3xl font-black">My Applications</h1>
+      <div className=" text-black">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <div className="flex flex-col items-start gap-3">
+            <h1 className="text-3xl font-black font-mangodolly">My Applications</h1>
+            <p className="text-gray-500 text-2xl font-medium mb-8">Track all your event registrations in one place</p>
           </div>
-          <p className="text-white/70 font-medium mb-8">Track all your event registrations in one place</p>
 
           {/* Quick Stats */}
           <div className="grid grid-cols-2 gap-4 max-w-sm">
-            <div className="bg-white/15 backdrop-blur-sm rounded-2xl p-4 text-center">
+            <div className="bg-white backdrop-blur-sm rounded-md p-4 text-center">
               <p className="text-2xl font-black">{stats.total}</p>
-              <p className="text-xs text-white/70 font-semibold uppercase tracking-wider">Registrations</p>
+              <p className="text-lg text-gray-500 font-bold uppercase tracking-wider">Register</p>
             </div>
-            <div className="bg-white/15 backdrop-blur-sm rounded-2xl p-4 text-center">
+            <div className="bg-white backdrop-blur-sm rounded-md p-4 text-center">
               <p className="text-2xl font-black text-green-300">{stats.attended}</p>
-              <p className="text-xs text-white/70 font-semibold uppercase tracking-wider">Attendance</p>
+              <p className="text-lg text-gray-500 font-bold uppercase tracking-wider">Attended</p>
             </div>
           </div>
         </div>
       </div>
 
-      <main className="max-w-6xl mx-auto px-6 py-10">
+      <main className="max-w-6xl mx-auto">
 
         {/* Loading State */}
         {(loading || isChecking) && (
