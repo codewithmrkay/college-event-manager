@@ -6,16 +6,33 @@ import { Event } from '../models/event.model.js';
 /** Map a ?status query param to a MongoDB filter on the Event collection */
 const buildStatusFilter = (status) => {
     const now = new Date();
-    if (status === 'past') {
-        // past: registrationStart < now
-        return { registrationStart: { $ne: null, $lt: now } };
-    }
-    if (status === 'live') {
-        // live: registrationStart > now
-        return { registrationStart: { $ne: null, $gt: now } };
-    }
-    // upcoming: No registrationStart set yet
-    return { registrationStart: null };
+
+    // Past: Registration or Event has ended
+    const isPast = {
+        $or: [
+            { registrationEnd: { $ne: null, $lt: now } },
+            { eventEndDate: { $ne: null, $lt: now } }
+        ]
+    };
+
+    // Live: Registration is explicitly open AND has started AND has not ended
+    const isLive = {
+        isRegistrationOpen: true,
+        registrationStart: { $ne: null, $lte: now },
+        eventStartDate: { $ne: null },
+        $and: [
+            { $or: [{ registrationEnd: null }, { registrationEnd: { $gt: now } }] },
+            { $or: [{ eventEndDate: null }, { eventEndDate: { $gt: now } }] }
+        ]
+    };
+
+    if (status === 'past') return isPast;
+    if (status === 'live') return isLive;
+
+    // Upcoming: Everything else (Registration not open, or haven't reached start date, or dates TBD)
+    return {
+        $nor: [isPast, isLive]
+    };
 };
 
 /** Helper to find an event and verify admin coordination */
@@ -551,17 +568,22 @@ export const showInterest = async (req, res) => {
         const event = await Event.findOne({ _id: id, isVerified: true });
         if (!event) return res.status(404).json({ message: 'Event not found' });
 
-        // Check if user is onboarded
+        // Check if user is onboarded and verified (for students)
         if (!req.user.isOnboarded) {
             return res.status(403).json({
                 message: 'Please complete your profile (onboarding) before showing interest in events.'
             });
         }
+        if (req.user.role === 'student' && !req.user.isVerified) {
+            return res.status(403).json({
+                message: 'Your account is pending verification by the admin. You can show interest once verified.'
+            });
+        }
 
-        // Interest only makes sense for upcoming events (registration date not set yet)
-        if (event.registrationStart !== null) {
+        // Interest only makes sense for upcoming events
+        if (event.status !== 'upcoming') {
             return res.status(400).json({
-                message: 'Interest can only be shown for upcoming events',
+                message: `Interest can only be shown for upcoming events. This event is currently ${event.status}.`,
             });
         }
 

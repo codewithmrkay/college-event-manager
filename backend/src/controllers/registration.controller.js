@@ -16,6 +16,18 @@ export const applyEvent = async (req, res) => {
             return res.status(404).json({ message: 'Event not found' });
         }
 
+        // Check if user is onboarded and verified (for students)
+        if (!req.user.isOnboarded) {
+            return res.status(403).json({
+                message: 'Please complete your profile (onboarding) before registering for events.'
+            });
+        }
+        if (req.user.role === 'student' && !req.user.isVerified) {
+            return res.status(403).json({
+                message: 'Your account is pending verification by the admin. You can register once verified.'
+            });
+        }
+
         // 2. Verify it's a public, open event
         if (!event.isVerified) {
             return res.status(400).json({ message: 'Event is not yet verified/published' });
@@ -36,9 +48,9 @@ export const applyEvent = async (req, res) => {
                 // Allow re-registration after cancellation
                 existing.status = 'confirmed';
                 await existing.save();
-                // Increment counters
+                // Increment only active participant count
                 await Event.findByIdAndUpdate(eventId, {
-                    $inc: { currentParticipants: 1, totalRegistrations: 1 },
+                    $inc: { currentParticipants: 1 },
                 });
                 return res.status(200).json({ message: 'Re-registered successfully', registration: existing });
             }
@@ -115,7 +127,7 @@ export const cancelApplication = async (req, res) => {
         await registration.save();
 
         await Event.findByIdAndUpdate(registration.event, {
-            $inc: { currentParticipants: -1 },
+            $inc: { currentParticipants: -1, totalRegistrations: -1 },
         });
 
         res.status(200).json({ message: 'Registration cancelled successfully', registration });

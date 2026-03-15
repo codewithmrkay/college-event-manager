@@ -215,10 +215,23 @@ const eventSchema = new mongoose.Schema({
 eventSchema.virtual('status').get(function () {
     const now = new Date();
 
-    if (this.eventEndDate && this.eventEndDate < now) return 'past';
-    if (this.eventStartDate && this.eventStartDate > now) return 'live';
-    if (this.eventStartDate && this.eventStartDate <= now && (!this.eventEndDate || this.eventEndDate >= now)) return 'live';
-    return 'upcoming'; // no start date set yet
+    // 1. Past: Registration window closed OR Event ended
+    const regEnd = this.registrationEnd ? new Date(this.registrationEnd) : null;
+    const eveEnd = this.eventEndDate ? new Date(this.eventEndDate) : null;
+    if ((regEnd && now > regEnd) || (eveEnd && now > eveEnd)) return 'past';
+
+    // 2. Live: Registration is explicitly open AND started AND event not yet over
+    const regStart = this.registrationStart ? new Date(this.registrationStart) : null;
+    if (this.isRegistrationOpen &&
+        regStart && now >= regStart &&
+        this.eventStartDate &&
+        (!regEnd || now <= regEnd) &&
+        (!eveEnd || now <= eveEnd)) {
+        return 'live';
+    }
+
+    // 3. Upcoming: Default state (TBD, or not yet open, or future start)
+    return 'upcoming';
 });
 
 // ─── Virtual: interest count ─────────────────────────────────────────────────

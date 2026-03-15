@@ -16,9 +16,7 @@ export const AppLayout = () => {
     }
   }, []);
 
-  useEffect(() => {
-    toast.dismiss();
-  }, [location.pathname]);
+
   return (
     <div className="px-2 lg:px-4 bg-base-300">
       <div className="fixed top-0 left-0 w-full px-2 lg:px-4 z-10 bg-white ">

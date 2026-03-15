@@ -37,7 +37,9 @@ const EventsCard = () => {
     title: backendEvent.title || 'Untitled Event',
     category: backendEvent.category || 'General',
     themes: [backendEvent.category, backendEvent.eventType].filter(Boolean),
-    participants: backendEvent.interestCount || 0,
+    participants: activeFilter === 'upcoming'
+      ? (backendEvent.interestCount || 0)
+      : (backendEvent.currentParticipants || 0),
     isInterested: backendEvent.isInterested || false,
     avatars: ['🎓', '🚀', '⭐'],
     status: [
@@ -95,7 +97,14 @@ const EventsCard = () => {
       setEvents(data.events || []);
 
       if (err?.response?.status === 403) {
-        toast.error(err.response.data.message || 'Please complete your profile first.');
+        const message = err.response.data.message;
+        if (message && message.toLowerCase().includes('onboarding')) {
+          toast.error('Profile Incomplete! Please complete your profile to show interest in events.');
+        } else if (message && message.toLowerCase().includes('verification')) {
+          toast.error('Verification Pending! Your account is awaiting admin approval.');
+        } else {
+          toast.error(message || 'Please complete your profile first.');
+        }
       } else {
         toast.error(err?.response?.data?.message || 'Failed to update interest. Please make sure you are logged in.');
       }
@@ -103,13 +112,20 @@ const EventsCard = () => {
   };
 
   return (
-    <section className="w-full py-5">
+    <section className="w-full py-5 h-screen">
       <div className="max-w-6xl mx-auto">
         <FilterEvents activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
         {loading ? (
-          <div className="flex justify-center items-center h-screen "><span className="text-gray-500 font-mangodolly text-2xl">Loading events...</span></div>
+          <div className="flex flex-col items-center justify-center py-24">
+            <div className="loading loading-bars loading-xl text-purple-600"></div>
+            <p className="mt-4 text-gray-500 text-2xl font-mangodolly font-medium animate-pulse">Loading your Events...</p>
+          </div>
+
         ) : displayEvents.length === 0 ? (
-          <div className="flex justify-center items-center h-screen "><span className="text-gray-500 font-mangodolly text-2xl">No {activeFilter} events found.</span></div>
+          <div className="flex flex-col items-center justify-center py-24">
+            <div className="loading loading-bars loading-xl text-purple-600"></div>
+            <p className="mt-4 text-gray-500 text-2xl font-mangodolly font-medium animate-pulse">No {activeFilter} events found.</p>
+          </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-screen">
             {displayEvents.map((event) => (
@@ -209,18 +225,36 @@ const EventsCard = () => {
 
                 {/* Apply / Like Button */}
                 {activeFilter === 'upcoming' ? (
+                  <div className="flex flex-col gap-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleToggleInterest(event.id);
+                      }}
+                      className={`w-full btn border-2 text-xl font-semibold py-2 flex items-center justify-center gap-2 transition-colors ${event.isInterested
+                        ? 'bg-red-500 border-red-500 text-white'
+                        : 'border-red-500 text-red-500 hover:bg-red-50'
+                        }`}
+                    >
+                      <Heart className={`w-5 h-5 ${event.isInterested ? 'fill-current' : ''}`} />
+                      {event.isInterested ? 'Interested' : 'Show Interest'}
+                    </button>
+                    <button
+                      disabled
+                      className="w-full btn bg-amber-100 text-amber-600 border-none text-lg py-2 font-bold cursor-not-allowed"
+                    >
+                      Registration Open Soon
+                    </button>
+                  </div>
+                ) : activeFilter === 'past' ? (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleToggleInterest(event.id);
+                      window.open(`/events/${event.slug || event.id}`, '_blank', 'noopener,noreferrer');
                     }}
-                    className={`w-full btn border-2 text-xl font-semibold py-2 flex items-center justify-center gap-2 rounded-xl transition-colors ${event.isInterested
-                      ? 'bg-red-500 border-red-500 text-white'
-                      : 'border-red-500 text-red-500 hover:bg-red-50'
-                      }`}
+                    className="w-full btn bg-red-500 hover:bg-red-600 border-none text-xl text-white py-2 font-semibold"
                   >
-                    <Heart className={`w-5 h-5 ${event.isInterested ? 'fill-current' : ''}`} />
-                    {event.isInterested ? 'Interested' : 'Show Interest'}
+                    Registration Closed
                   </button>
                 ) : (
                   <button

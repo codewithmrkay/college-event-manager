@@ -104,20 +104,19 @@ const ApplicationCard = ({ registration, onCancel, cancelling }) => {
         </div>
 
         {/* Action buttons */}
-        <div className="flex gap-2 pt-1">
+        <div className="flex flex-col gap-2 pt-1">
           <button
             onClick={() => navigate(`/events/${event?.slug || event?._id}`)}
-            className="flex-1 btn btn-md  flex items-center justify-center gap-1"
+            className="btn btn-md text-lg bg-blue-500 text-white hover:bg-blue-600"
           >
-            View Event <ArrowRight className="w-3.5 h-3.5" />
+            View Event
           </button>
 
           {isCancellable && (
             <button
               onClick={() => onCancel(_id)}
               disabled={cancelling === _id}
-              className="btn btn-sm btn-ghost border border-red-200 rounded-xl text-red-500 hover:bg-red-50 hover:border-red-300 px-4 font-semibold disabled:opacity-60"
-            >
+              className="btn btn-md text-lg bg-red-500 text-white hover:bg-red-600"            >
               {cancelling === _id ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
@@ -200,6 +199,42 @@ export const Applications = () => {
     attended: registrations.filter(r => r.attended).length,
   };
 
+
+  if ((loading)) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 h-screen w-full">
+        <div className="loading loading-bars loading-xl text-purple-600"></div>
+        <p className="mt-4 text-gray-500 text-2xl font-mangodolly font-medium animate-pulse">Loading your applications...</p>
+      </div>
+    );
+  }
+
+
+
+
+  if (!loading && !isChecking && filtered.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-center w-full h-screen">
+        <div className="w-24 h-24 bg-purple-50 rounded-full flex items-center justify-center mb-6">
+          <FileText className="w-10 h-10 text-purple-300" />
+        </div>
+        <h3 className="text-xl font-bold text-gray-700 mb-2 font-mangodolly">
+          No applications yet
+        </h3>
+        <p className="text-gray-500 mb-8 max-w-sm text-xl">
+          Browse events and click Register Now to apply for events you are interested in.
+        </p>
+        {true && (
+          <button
+            onClick={() => navigate('/events')}
+            className="btn btn-lg bg-blue-500 hover:bg-blue-600 text-white"
+          >
+            Browse Events
+          </button>
+        )}
+      </div>
+    )
+  }
   return (
     <div className="min-h-screen pt-10  w-full">
       {/* Page Header */}
@@ -223,40 +258,7 @@ export const Applications = () => {
           </div>
         </div>
       </div>
-
       <main className="max-w-6xl mx-auto">
-
-        {/* Loading State */}
-        {(loading || isChecking) && (
-          <div className="flex flex-col items-center justify-center py-24">
-            <div className="loading loading-spinner loading-lg text-purple-600"></div>
-            <p className="mt-4 text-gray-400 font-medium animate-pulse">Loading your applications...</p>
-          </div>
-        )}
-
-        {/* Empty State */}
-        {!loading && !isChecking && filtered.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <div className="w-24 h-24 bg-purple-50 rounded-full flex items-center justify-center mb-6">
-              <FileText className="w-10 h-10 text-purple-300" />
-            </div>
-            <h3 className="text-xl font-bold text-gray-700 mb-2">
-              No applications yet
-            </h3>
-            <p className="text-gray-400 mb-8 max-w-sm">
-              Browse events and click Register Now to apply for events you are interested in.
-            </p>
-            {true && (
-              <button
-                onClick={() => navigate('/events')}
-                className="btn btn-primary rounded-2xl px-8"
-              >
-                Browse Events
-              </button>
-            )}
-          </div>
-        )}
-
         {/* Application Grid */}
         {!loading && filtered.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -58,8 +58,9 @@ export const Dashboard = () => {
 
   if (isChecking || (loading && events.length === 0)) {
     return (
-      <div className="flex w-full items-center justify-center min-h-screen">
-        <span className="loading loading-spinner loading-xl text-primary"></span>
+      <div className="flex flex-col items-center justify-center py-24 w-full h-screen">
+        <div className="loading loading-bars loading-xl text-purple-600"></div>
+        <p className="mt-4 text-gray-500 text-2xl font-mangodolly font-medium animate-pulse">Loading your Dashboard...</p>
       </div>
     );
   }
@@ -115,8 +116,8 @@ export const Dashboard = () => {
           {interestedEvents.length > 0 && (
             <div className="space-y-4">
               <div className="flex items-center justify-between px-2">
-                <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                  <Heart className="w-6 h-6 text-pink-500 fill-pink-500" /> Your Interested Events
+                <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
+                  <Heart className="w-8 h-8 animate-pulse text-pink-500 fill-pink-500" /> Your Interested Events
                 </h2>
               </div>
               <div className="grid grid-cols-1 gap-4">
@@ -265,7 +266,7 @@ export const Dashboard = () => {
                   </p>
                 </div>
               </div>
-              
+
             </div>
           )}
 

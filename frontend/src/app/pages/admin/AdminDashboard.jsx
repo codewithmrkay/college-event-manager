@@ -43,8 +43,9 @@ export const AdminDashboard = () => {
 
     if (loading && events.length === 0) {
         return (
-            <div className="flex items-center justify-center min-h-[60vh]">
-                <span className="loading loading-spinner loading-lg text-primary"></span>
+            <div className="flex flex-col items-center justify-center py-24 w-full h-screen">
+                <div className="loading loading-bars loading-xl text-purple-600"></div>
+                <p className="mt-4 text-gray-500 text-2xl font-mangodolly font-medium animate-pulse">Loading your Dashboard...</p>
             </div>
         );
     }
@@ -146,11 +147,11 @@ export const AdminDashboard = () => {
                                 <div className="bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                                     <LayoutDashboard className="w-8 h-8 text-blue-400" />
                                 </div>
-                                <h3 className="text-lg font-bold text-gray-900">No events found</h3>
-                                <p className="text-gray-500 max-w-xs mx-auto mt-1">
+                                <h3 className="text-lg font-bold text-gray-900 font-mangodolly">No events found</h3>
+                                <p className="text-gray-500 max-w-xs mx-auto mt-1 text-lg">
                                     Start by creating your first event to see it appear here.
                                 </p>
-                                <Link to="/admin/events/create" className="btn btn-sm btn-outline btn-primary mt-6 rounded-lg">
+                                <Link to="/admin/events/create" className="btn btn-lg text-white bg-blue-500 hover:bg-blue-600 mt-6">
                                     Get Started
                                 </Link>
                             </div>

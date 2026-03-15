@@ -1,1 +1,11 @@
-# college-event-manager
+# Project Report: College Event Management System
+
+| Sr.no | Title | Description |
+| :---: | :--- | :--- |
+| **1** | **Name of the project** | **College Event Management System** |
+| **2** | **Objective/Vision** | &#8226; To maintain centralized records of college events, student registrations, attendees, and organizers.<br>&#8226; To streamline the event creation, publishing, and application process.<br>&#8226; To manage event capacities and track stock/participation levels to avoid over-booking.<br>&#8226; To generate attendance sheets and export reports quickly, reducing manual tracking errors.<br>&#8226; To track overall student participation and event success for better institutional analysis. |
+| **3** | **User of the System** | &#8226; Super Admin<br>&#8226; Admin / Event Organizer<br>&#8226; Student / Participant |
+| **4** | **Functional Requirement** | &#8226; **User Login and Authentication**<br>&nbsp;&nbsp;&nbsp;- The system should allow users (Student, Admin, Super Admin) to log in securely using JWT and Google OAuth.<br>&nbsp;&nbsp;&nbsp;- Different users should have different access rights and dashboards.<br>&#8226; **Event Management**<br>&nbsp;&nbsp;&nbsp;- The system should allow adding, updating, and requesting approval for events.<br>&nbsp;&nbsp;&nbsp;- It should store detailed event data like schedules, banner images, fees, category, and participation type (Solo/Team).<br>&#8226; **Registration & Attendance Management**<br>&nbsp;&nbsp;&nbsp;- The system should allow students to register for live events instantly.<br>&nbsp;&nbsp;&nbsp;- It should allow admins to track total participants and mark attendance. |
+| **5** | **Report** | &#8226; Event Participation Report (Attendance Export)<br>&#8226; Daily/Event-wise Registration Report<br>&#8226; Super Admin Analytics Report |
+| **6** | **Language and Technologies to be used** | &#8226; **Frontend**: React.js, Tailwind CSS, JavaScript<br>&#8226; **Backend**: Node.js, Express.js<br>&#8226; **Database**: MongoDB |
+| **7** | **Tools to be used** | &#8226; VS Code<br>&#8226; Git & GitHub<br>&#8226; Postman<br>&#8226; MongoDB Compass / Atlas |
