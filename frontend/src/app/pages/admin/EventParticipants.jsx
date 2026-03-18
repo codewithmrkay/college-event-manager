@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { getEventParticipants, markAttendance } from '../../services/event.services';
 import { useAdminEventStore } from '../../store/adminEvent.store';
+import QRScannerModal from '../../components/admin/QRScannerModal';
 import toast from 'react-hot-toast';
 
 export const EventParticipants = () => {
@@ -18,6 +19,7 @@ export const EventParticipants = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [markingId, setMarkingId] = useState(null);
+    const [showScanner, setShowScanner] = useState(false);
 
     const { fetchEventById } = useAdminEventStore();
 
@@ -42,6 +44,12 @@ export const EventParticipants = () => {
     useEffect(() => {
         loadData();
     }, [idOrSlug]);
+
+    const handleAttendanceMarked = (registrationId) => {
+        setParticipants(prev =>
+            prev.map(p => p._id === registrationId ? { ...p, attended: true } : p)
+        );
+    };
 
     const handleToggleAttendance = async (registrationId, currentStatus) => {
         setMarkingId(registrationId);
@@ -79,9 +87,9 @@ export const EventParticipants = () => {
     if (loading) {
         return (
             <div className="flex flex-col items-center justify-center py-24 w-full h-screen">
-            <div className="loading loading-bars loading-xl text-purple-600"></div>
-            <p className="mt-4 text-gray-500 text-2xl font-mangodolly font-medium animate-pulse">Loading Participant data...</p>
-          </div>
+                <div className="loading loading-bars loading-xl text-purple-600"></div>
+                <p className="mt-4 text-gray-500 text-2xl font-mangodolly font-medium animate-pulse">Loading Participant data...</p>
+            </div>
         );
     }
 
@@ -107,7 +115,10 @@ export const EventParticipants = () => {
                     </div>
 
                     <div className="flex gap-3">
-                        <button className="btn btn-outline border-gray-200 bg-white hover:bg-gray-50 text-gray-700 rounded-md flex items-center gap-2 px-6">
+                        <button
+                            onClick={() => setShowScanner(true)}
+                            className="btn btn-outline border-gray-200 bg-white hover:bg-gray-50 text-gray-700 rounded-md flex items-center gap-2 px-6"
+                        >
                             <QrCode className="w-5 h-5" /> Scan QR
                         </button>
                         <button className="btn btn-primary bg-blue-500 hover:bg-blue-600 border-none text-white rounded-md flex items-center gap-2 px-6 shadow-lg">
@@ -266,6 +277,13 @@ export const EventParticipants = () => {
                     </div>
                 </div>
             </div>
+
+            <QRScannerModal
+                isOpen={showScanner}
+                onClose={() => setShowScanner(false)}
+                participants={participants}
+                onAttendanceMarked={handleAttendanceMarked}
+            />
         </div>
     );
 };
