@@ -1,35 +1,47 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { QrCode, XCircle, CheckCircle, Loader2 } from 'lucide-react';
-import { Html5QrcodeScanner } from 'html5-qrcode';
+import { Html5Qrcode } from 'html5-qrcode';
 import toast from 'react-hot-toast';
 import { markAttendance } from '../../services/event.services';
 
 const QRScannerModal = ({ isOpen, onClose, participants, onAttendanceMarked }) => {
     const [scannedParticipant, setScannedParticipant] = useState(null);
     const [isProcessing, setIsProcessing] = useState(false);
+    const scannerRef = useRef(null);
 
     useEffect(() => {
-        let scanner = null;
         if (isOpen && !scannedParticipant) {
-            const timer = setTimeout(() => {
-                scanner = new Html5QrcodeScanner("reader", {
-                    fps: 10,
-                    qrbox: { width: 250, height: 250 },
-                    aspectRatio: 1.0,
-                    showTorchButtonIfSupported: true
-                });
+            const startScanner = async () => {
+                try {
+                    const html5QrCode = new Html5Qrcode("reader");
+                    scannerRef.current = html5QrCode;
 
-                scanner.render(onScanSuccess, (err) => {
-                    // console.log(err);
-                });
-            }, 100);
+                    const config = {
+                        fps: 15,
+                        qrbox: { width: 250, height: 250 },
+                        aspectRatio: 1.0,
+                    };
 
+                    await html5QrCode.start(
+                        { facingMode: "environment" },
+                        config,
+                        onScanSuccess
+                    );
+                } catch (err) {
+                    console.error("Scanner error:", err);
+                    toast.error("Camera access failed");
+                }
+            };
+
+            const timer = setTimeout(startScanner, 200);
             return () => {
                 clearTimeout(timer);
-                if (scanner) {
-                    scanner.clear().catch(error => {
-                        console.error("Failed to clear scanner", error);
-                    });
+                if (scannerRef.current) {
+                    if (scannerRef.current.isScanning) {
+                        scannerRef.current.stop().then(() => {
+                            scannerRef.current.clear();
+                        }).catch(e => console.error(e));
+                    }
                 }
             };
         }
@@ -39,45 +51,39 @@ const QRScannerModal = ({ isOpen, onClose, participants, onAttendanceMarked }) =
         try {
             const data = JSON.parse(decodedText);
             const studentId = data.id;
-
-            if (!studentId) {
-                toast.error("Invalid QR: Student ID not found");
-                return;
-            }
+            if (!studentId) return;
 
             const found = participants.find(p => p.student?._id === studentId);
-
             if (!found) {
-                toast.error("Student not registered for this event", { duration: 4000 });
+                toast.error("Not Registered", { id: 'scan-error' });
                 return;
             }
 
             if (found.status === 'cancelled') {
-                toast.error("Registration is cancelled for this student");
+                toast.error("Cancelled Registration", { id: 'scan-error' });
                 return;
             }
 
+            if (scannerRef.current) {
+                scannerRef.current.stop().catch(e => console.error(e));
+            }
+
             setScannedParticipant(found);
-            toast.success("Student found!");
         } catch (e) {
-            toast.error("Invalid QR Code format");
+            // Silence invalid scans
         }
     };
 
     const handleConfirmAttendance = async () => {
         if (!scannedParticipant) return;
-
         setIsProcessing(true);
         try {
             await markAttendance(scannedParticipant._id, true);
-            toast.success(`Attendance marked for ${scannedParticipant.student.fullName}`);
+            toast.success("Attendance Success!");
             onAttendanceMarked(scannedParticipant._id);
-            // Don't close immediately if we want "Scan Another" to be smooth, 
-            // but the user might prefer closing after success.
-            // Let's close for now as per previous logic.
             handleClose();
         } catch (error) {
-            toast.error('Failed to update attendance');
+            toast.error('Failed to mark');
         } finally {
             setIsProcessing(false);
         }
@@ -91,119 +97,123 @@ const QRScannerModal = ({ isOpen, onClose, participants, onAttendanceMarked }) =
     if (!isOpen) return null;
 
     return (
-        <div className="modal modal-open">
-            <div className="modal-box max-w-lg p-0 overflow-hidden bg-white border-2 border-blue-500 rounded-2xl shadow-2xl animate-in zoom-in duration-300">
-                {/* Modal Header */}
-                <div className="bg-blue-500 p-4 flex justify-between items-center text-white">
-                    <h3 className="font-mangodolly text-xl font-bold flex items-center gap-2">
-                        <QrCode className="w-6 h-6" /> Attendance Scanner
-                    </h3>
-                    <button
-                        onClick={handleClose}
-                        className="btn btn-circle btn-sm btn-ghost hover:bg-blue-600 text-white border-none"
-                    >
-                        <XCircle className="w-6 h-6" />
-                    </button>
-                </div>
+        <div className="fixed inset-0 z-[100] flex flex-col bg-black overflow-hidden font-sans animate-in fade-in duration-300">
 
-                <div className="p-6">
-                    {!scannedParticipant ? (
-                        <div className="space-y-4">
-                            <div className="relative rounded-xl overflow-hidden border-4 border-dashed border-gray-200 bg-gray-50">
-                                <div id="reader" className="w-full"></div>
-                                <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                                    <div className="w-64 h-64 border-2 border-blue-400/50 rounded-lg animate-pulse" />
+            {/* Header / Close Button */}
+            <div className="absolute top-0 inset-x-0 z-50 p-6 flex justify-between items-center bg-linear-to-b from-black/60 to-transparent">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center text-white">
+                        <QrCode className="w-6 h-6" />
+                    </div>
+                    <span className="text-white font-bold text-xl tracking-wide font-mangodolly">Scanner</span>
+                </div>
+                <button
+                    onClick={handleClose}
+                    className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white border border-white/20 hover:bg-white/20 transition-all"
+                >
+                    <XCircle className="w-7 h-7" />
+                </button>
+            </div>
+
+            {/* Scanner / Preview Layer */}
+            <div className="flex-1 relative">
+                {!scannedParticipant ? (
+                    <div className="w-full h-full relative">
+                        {/* Video Feed */}
+                        <div id="reader" className="w-full h-full" />
+
+                        {/* Semi-transparent Overlay */}
+                        <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center pointer-events-none">
+                            <div className="relative">
+                                {/* The Frame */}
+                                <div className="w-64 h-64 border-2 border-white/30 rounded-3xl relative">
+                                    {/* PhonePe-style active corners */}
+                                    <div className="absolute -top-1 -left-1 w-10 h-10 border-t-4 border-l-4 border-blue-500 rounded-tl-xl" />
+                                    <div className="absolute -top-1 -right-1 w-10 h-10 border-t-4 border-r-4 border-blue-500 rounded-tr-xl" />
+                                    <div className="absolute -bottom-1 -left-1 w-10 h-10 border-b-4 border-l-4 border-blue-500 rounded-bl-xl" />
+                                    <div className="absolute -bottom-1 -right-1 w-10 h-10 border-b-4 border-r-4 border-blue-500 rounded-br-xl" />
+
+                                    {/* Moving Line */}
+                                    <div className="absolute inset-x-0 h-1 bg-blue-400 shadow-[0_0_15px_#3b82f6] animate-scan-line top-0" />
                                 </div>
                             </div>
-                            <p className="text-center text-gray-500 font-medium">
-                                Position the student's QR code within the frame to scan
+                            <p className="text-white/60 mt-10 font-bold uppercase tracking-[0.2em] text-[10px]">
+                                Scanning QR Code...
                             </p>
                         </div>
-                    ) : (
-                        <div className="space-y-6 animate-in slide-in-from-bottom duration-500">
-                            <div className="bg-blue-50 rounded-2xl p-6 border-2 border-blue-100 flex flex-col items-center text-center">
-                                <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-lg mb-4">
+                    </div>
+                ) : (
+                    <div className="absolute inset-0 bg-white flex flex-col animate-in slide-in-from-bottom duration-500 overflow-y-auto">
+                        <div className="flex-1 flex flex-col items-center justify-center p-8 space-y-8">
+                            <div className="relative group">
+                                <div className="absolute inset-0 bg-blue-500 blur-3xl opacity-20" />
+                                <div className="w-32 h-32 rounded-[2rem] overflow-hidden border-4 border-blue-50 shadow-2xl relative">
                                     <img
                                         src={scannedParticipant.student?.profilePic || `https://ui-avatars.com/api/?name=${scannedParticipant.student?.fullName || 'S'}&background=random`}
                                         className="w-full h-full object-cover"
                                         alt="Student"
                                     />
                                 </div>
-                                <h4 className="text-2xl font-black text-gray-900 font-mangodolly italic">
+                            </div>
+
+                            <div className="text-center">
+                                <h4 className="text-3xl font-black text-gray-900 font-mangodolly italic tracking-tight">
                                     {scannedParticipant.student?.fullName}
                                 </h4>
-                                <p className="text-blue-600 font-bold tracking-wider mt-1">
-                                    {scannedParticipant.student?.rollNo}
-                                </p>
-                                <div className="flex flex-wrap justify-center gap-2 mt-4">
-                                    <span className="bg-white px-3 py-1 rounded-full text-xs font-bold text-gray-600 border border-blue-100 uppercase">
-                                        {scannedParticipant.student?.department}
-                                    </span>
-                                    <span className="bg-white px-3 py-1 rounded-full text-xs font-bold text-gray-600 border border-blue-100 uppercase">
-                                        {scannedParticipant.student?.class}
-                                    </span>
+                                <p className="text-blue-600 font-black text-xl mt-1">{scannedParticipant.student?.rollNo}</p>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
+                                <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 flex flex-col items-center">
+                                    <span className="text-[10px] uppercase font-black text-gray-400 mb-1">Department</span>
+                                    <span className="font-bold text-gray-800">{scannedParticipant.student?.department}</span>
+                                </div>
+                                <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 flex flex-col items-center">
+                                    <span className="text-[10px] uppercase font-black text-gray-400 mb-1">Class</span>
+                                    <span className="font-bold text-gray-800">{scannedParticipant.student?.class}</span>
                                 </div>
                             </div>
 
-                            <div className="space-y-3">
+                            <div className="w-full max-w-sm pt-8">
                                 {scannedParticipant.attended ? (
-                                    <div className="bg-emerald-100 text-emerald-700 p-4 rounded-xl flex items-center justify-center gap-3 font-bold border border-emerald-200">
-                                        <CheckCircle className="w-6 h-6" /> Already marked present
+                                    <div className="w-full py-5 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center gap-3 font-black text-lg border-2 border-emerald-100">
+                                        <CheckCircle className="w-6 h-6" /> ALREADY PRESENT
                                     </div>
                                 ) : (
                                     <button
                                         onClick={handleConfirmAttendance}
                                         disabled={isProcessing}
-                                        className="btn btn-lg w-full bg-blue-500 hover:bg-blue-600 border-none text-white font-black text-lg shadow-xl shadow-blue-200"
+                                        className="w-full py-5 bg-blue-600 hover:bg-blue-700 active:scale-95 transition-all text-white rounded-2xl font-black text-xl shadow-xl shadow-blue-100 flex items-center justify-center"
                                     >
-                                        {isProcessing ? (
-                                            <>
-                                                <Loader2 className="w-5 h-5 animate-spin" />
-                                                Marking...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <CheckCircle className="w-5 h-5" /> Mark Attendance
-                                            </>
-                                        )}
+                                        {isProcessing ? <Loader2 className="w-6 h-6 animate-spin" /> : "CONFIRM ATTENDANCE"}
                                     </button>
                                 )}
 
                                 <button
                                     onClick={() => setScannedParticipant(null)}
-                                    className="btn btn-lg btn-ghost w-full text-gray-400 font-bold hover:bg-gray-50"
+                                    className="w-full py-4 text-gray-400 font-black text-sm uppercase tracking-widest mt-4"
                                 >
-                                    Scan Another
+                                    Scan another
                                 </button>
                             </div>
                         </div>
-                    )}
-                </div>
-
-                <style>{`
-                    #reader { border: none !important; padding: 0 !important; }
-                    #reader video { border-radius: 0.75rem !important; }
-                    #reader__dashboard_section_csr button {
-                        background-color: #3b82f6 !important;
-                        color: white !important;
-                        border: none !important;
-                        padding: 8px 16px !important;
-                        border-radius: 8px !important;
-                        font-weight: 700 !important;
-                        cursor: pointer !important;
-                        margin: 10px 5px !important;
-                        font-family: inherit !important;
-                    }
-                    #reader__dashboard_section_csr button:hover { background-color: #2563eb !important; }
-                    #reader__camera_selection {
-                        padding: 8px !important;
-                        border-radius: 8px !important;
-                        border: 1px solid #e5e7eb !important;
-                        outline: none !important;
-                    }
-                `}</style>
+                    </div>
+                )}
             </div>
-            <div className="modal-backdrop bg-black/60 backdrop-blur-sm" onClick={handleClose} />
+
+            <style>{`
+                #reader { background: black !important; }
+                #reader video { object-fit: cover !important; width: 100% !important; height: 100% !important; }
+                @keyframes scan-line {
+                    0% { top: 0; opacity: 0; }
+                    5% { opacity: 1; }
+                    95% { opacity: 1; }
+                    100% { top: 100%; opacity: 0; }
+                }
+                .animate-scan-line {
+                    animation: scan-line 2.5s infinite linear;
+                }
+            `}</style>
         </div>
     );
 };
