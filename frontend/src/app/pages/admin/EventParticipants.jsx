@@ -95,9 +95,9 @@ export const EventParticipants = () => {
 
     return (
         <div className="bg-base-300 min-h-screen animate-in fade-in duration-500">
-            <div className="max-w-7xl mx-auto space-y-8 py-10">
+            <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8 py-6 sm:py-10 sm:px-6 lg:px-8">
                 {/* Header */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                     <div className="space-y-1">
                         <button
                             onClick={() => navigate(-1)}
@@ -105,23 +105,23 @@ export const EventParticipants = () => {
                         >
                             <ArrowLeft className="w-5 h-5" /> Back to Events
                         </button>
-                        <h1 className="text-3xl font-black text-gray-900 font-mangodolly flex items-center gap-3">
+                        <h1 className=" text-xl sm:text-3xl font-black text-gray-900 font-mangodolly flex items-center gap-3">
                             <Users className="w-8 h-8 text-pink-500" />
                             Participants List
                         </h1>
-                        <p className="text-gray-500 text-2xl font-medium mt-1 border-l-4 font-mangodolly pl-4 mt-4 border-blue-500">
+                        <p className="text-gray-500 text-lg sm:text-2xl font-medium mt-1 border-l-4 font-mangodolly pl-4 mt-4 border-blue-500 leading-tight">
                             {event?.title || "Loading event details..."}
                         </p>
                     </div>
 
-                    <div className="flex gap-3">
+                    <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
                         <button
                             onClick={() => setShowScanner(true)}
-                            className="btn btn-outline border-gray-200 bg-white hover:bg-gray-50 text-gray-700 rounded-md flex items-center gap-2 px-6"
+                            className="btn btn-outline border-gray-200 bg-white hover:bg-gray-50 text-gray-700 rounded-md flex items-center justify-center sm:justify-start gap-2 px-6 h-12"
                         >
                             <QrCode className="w-5 h-5" /> Scan QR
                         </button>
-                        <button className="btn btn-primary bg-blue-500 hover:bg-blue-600 border-none text-white rounded-md flex items-center gap-2 px-6 shadow-lg">
+                        <button className="btn btn-primary bg-blue-500 hover:bg-blue-600 border-none text-white rounded-md flex items-center justify-center sm:justify-start gap-2 px-6 h-12 shadow-lg">
                             <Download className="w-5 h-5" /> Export CSV
                         </button>
                     </div>
@@ -138,11 +138,11 @@ export const EventParticipants = () => {
                         <div key={idx} className="bg-white p-4 rounded-md border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                             <div className="flex items-start justify-between gap-4">
                                 <div>
-                                    <p className="text-xl font-bold text-gray-400 uppercase tracking-wider">{stat.label}</p>
-                                    <h3 className="text-3xl font-mangodolly font-black text-gray-700 mt-1">{stat.value}</h3>
+                                    <p className="text-sm sm:text-xl font-bold text-gray-400 uppercase tracking-wider">{stat.label}</p>
+                                    <h3 className="text-2xl sm:text-3xl font-mangodolly font-black text-gray-700 mt-0.5 sm:mt-1">{stat.value}</h3>
                                 </div>
-                                <div className={`${stat.bg} ${stat.color} p-3 rounded-xl`}>
-                                    <stat.icon className="w-6 h-6" />
+                                <div className={`${stat.bg} ${stat.color} p-2.5 sm:p-3 rounded-xl`}>
+                                    <stat.icon className="w-5 h-5 sm:w-6 sm:h-6" />
                                 </div>
                             </div>
                         </div>
@@ -163,7 +163,7 @@ export const EventParticipants = () => {
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
-                        <div className="flex items-center gap-2 text-md font-bold text-gray-500">
+                        <div className="flex items-center gap-2 text-sm sm:text-md font-bold text-gray-500 w-full md:w-auto justify-center md:justify-end">
                             Showing {filteredParticipants.length} of {stats.total} entries
                         </div>
                     </div>
@@ -174,33 +174,39 @@ export const EventParticipants = () => {
                             <table className="table w-full border-collapse">
                                 <thead>
                                     <tr className="border-b border-gray-100 bg-gray-50/50">
-                                        <th className="py-5 pl-8 text-[12px] font-black uppercase tracking-[0.2em] text-gray-500">Student</th>
-                                        <th className="text-[12px] font-black uppercase tracking-[0.2em] text-gray-500">College Info</th>
-                                        <th className="text-[12px] font-black uppercase tracking-[0.2em] text-gray-500">Contact</th>
-                                        <th className="text-[12px] font-black uppercase tracking-[0.2em] text-gray-500">Status</th>
-                                        <th className="text-center pr-8 text-[12px] font-black uppercase tracking-[0.2em] text-gray-500">Attendance</th>
+                                        <th className="py-4 sm:py-5 pl-4 sm:pl-8 text-[10px] sm:text-[12px] font-black uppercase tracking-[0.1em] sm:tracking-[0.2em] text-gray-500 text-left">Student</th>
+                                        <th className="hidden sm:table-cell text-[10px] sm:text-[12px] font-black uppercase tracking-[0.1em] sm:tracking-[0.2em] text-gray-500">College Info</th>
+                                        <th className="hidden md:table-cell text-[10px] sm:text-[12px] font-black uppercase tracking-[0.1em] sm:tracking-[0.2em] text-gray-500">Contact</th>
+                                        <th className="hidden sm:table-cell text-[10px] sm:text-[12px] font-black uppercase tracking-[0.1em] sm:tracking-[0.2em] text-gray-500">Status</th>
+                                        <th className="text-center pr-4 sm:pr-8 text-[10px] sm:text-[12px] font-black uppercase tracking-[0.1em] sm:tracking-[0.2em] text-gray-500">Attendance</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-50">
                                     {filteredParticipants.length > 0 ? (
                                         filteredParticipants.map((p) => (
                                             <tr key={p._id} className={`hover:bg-gray-50/50 transition-colors group ${p.status === 'cancelled' ? 'opacity-60 grayscale' : ''}`}>
-                                                <td className="py-6 pl-8">
-                                                    <div className="flex items-center gap-4">
-                                                        <div className="w-12 h-12 rounded-lg overflow-hidden shadow-sm flex-shrink-0 bg-gray-100 border border-gray-200 group-hover:scale-105 transition-transform">
+                                                <td className="py-4 sm:py-6 pl-4 sm:pl-8">
+                                                    <div className="flex items-center gap-3 sm:gap-4">
+                                                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg overflow-hidden shadow-sm flex-shrink-0 bg-gray-100 border border-gray-200 group-hover:scale-105 transition-transform">
                                                             <img
                                                                 src={p.student?.profilePic || `https://ui-avatars.com/api/?name=${p.student?.fullName || 'S'}&background=random`}
                                                                 alt={p.student?.fullName}
                                                                 className="w-full h-full object-cover"
                                                             />
                                                         </div>
-                                                        <div>
-                                                            <p className="font-bold text-gray-900 text-lg group-hover:text-blue-600 transition-colors">{p.student?.fullName || 'Deleted Account'}</p>
-                                                            <p className="text-sm text-gray-400 font-medium">{p.student?.email}</p>
+                                                        <div className="min-w-0">
+                                                            <p className="font-bold text-gray-900 text-sm sm:text-lg group-hover:text-blue-600 transition-colors truncate">{p.student?.fullName || 'Deleted Account'}</p>
+                                                            <p className="text-[10px] sm:text-sm text-gray-400 font-medium truncate">{p.student?.email}</p>
+                                                            {/* Mobile only info */}
+                                                            <div className="sm:hidden mt-1 flex flex-col gap-0.5">
+                                                                <p className="text-[10px] font-bold text-gray-500 flex items-center gap-1">
+                                                                    <Hash className="w-2.5 h-2.5" /> {p.student?.rollNo || 'N/A'}
+                                                                </p>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td>
+                                                <td className="hidden sm:table-cell">
                                                     <div className="space-y-1">
                                                         <p className="text-md font-bold text-gray-700 flex items-center gap-1.5">
                                                             <Hash className="w-4 h-4 text-blue-500" /> {p.student?.rollNo || 'N/A'}
@@ -210,14 +216,14 @@ export const EventParticipants = () => {
                                                         </p>
                                                     </div>
                                                 </td>
-                                                <td>
+                                                <td className="hidden md:table-cell">
                                                     <div className="space-y-1">
                                                         <p className="text-md font-bold text-gray-700 flex items-center gap-1.5">
                                                             <Smartphone className="w-4 h-4 text-emerald-500" /> {p.student?.phoneNumber || 'N/A'}
                                                         </p>
                                                     </div>
                                                 </td>
-                                                <td>
+                                                <td className="hidden sm:table-cell">
                                                     {p.status === 'confirmed' ? (
                                                         <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider">
                                                             Active
@@ -228,30 +234,30 @@ export const EventParticipants = () => {
                                                         </span>
                                                     )}
                                                 </td>
-                                                <td className="text-center pr-8">
+                                                <td className="text-center pr-4 sm:pr-8">
                                                     {p.status !== 'cancelled' ? (
                                                         <button
                                                             onClick={() => handleToggleAttendance(p._id, p.attended)}
                                                             disabled={markingId === p._id}
-                                                            className={`btn btn-lg px-4 min-w-[120px] font-sans font-semibold text-md transition-all border-none ${p.attended
+                                                            className={`btn btn-sm sm:btn-lg px-3 sm:px-4 min-w-[80px] sm:min-w-[120px] font-sans font-semibold text-xs sm:text-md transition-all border-none ${p.attended
                                                                 ? 'bg-emerald-100 text-emerald-600 hover:bg-emerald-200'
                                                                 : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
                                                                 }`}
                                                         >
                                                             {markingId === p._id ? (
-                                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                                                <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />
                                                             ) : p.attended ? (
-                                                                <div className="flex items-center gap-1.5">
-                                                                    <CheckCircle className="w-3.5 h-3.5" /> Present
+                                                                <div className="flex items-center gap-1 sm:gap-1.5">
+                                                                    <CheckCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> <span className="hidden sm:inline">Present</span><span className="sm:hidden">PRS</span>
                                                                 </div>
                                                             ) : (
-                                                                <div className="flex items-center gap-1.5">
-                                                                    <XCircle className="w-3.5 h-3.5 opacity-50" /> Mark Present
+                                                                <div className="flex items-center gap-1 sm:gap-1.5">
+                                                                    <XCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5 opacity-50" /> <span className="hidden sm:inline">Mark Present</span><span className="sm:hidden">Mark</span>
                                                                 </div>
                                                             )}
                                                         </button>
                                                     ) : (
-                                                        <span className="text-sm text-gray-400 font-bold italic">N/A</span>
+                                                        <span className="text-xs sm:text-sm text-gray-400 font-bold italic">N/A</span>
                                                     )}
                                                 </td>
                                             </tr>
