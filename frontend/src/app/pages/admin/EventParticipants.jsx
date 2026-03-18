@@ -128,7 +128,7 @@ export const EventParticipants = () => {
                 </div>
 
                 {/* Stats Summary */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
                     {[
                         { label: 'Total Registered', value: stats.total, icon: Users, color: 'text-blue-600', bg: 'bg-blue-100' },
                         { label: 'Present', value: stats.present, icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-100' },
@@ -136,7 +136,7 @@ export const EventParticipants = () => {
                         { label: 'Cancelled', value: stats.cancelled, icon: Trash2, color: 'text-gray-500', bg: 'bg-gray-100' },
                     ].map((stat, idx) => (
                         <div key={idx} className="bg-white p-4 rounded-md border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                            <div className="flex items-start justify-between gap-4">
+                            <div className="flex items-start justify-between gap-2">
                                 <div>
                                     <p className="text-xl font-bold text-gray-400 uppercase tracking-wider">{stat.label}</p>
                                     <h3 className="text-3xl font-mangodolly font-black text-gray-700 mt-1">{stat.value}</h3>
@@ -152,7 +152,7 @@ export const EventParticipants = () => {
                 {/* Main Content Area */}
                 <div className="space-y-4">
                     {/* Search & Toolbar */}
-                    <div className="bg-white p-4 rounded-md border border-gray-100 shadow-sm flex flex-col md:flex-row justify-between gap-4 items-center">
+                    <div className="bg-white p-2 rounded-md border shrink border-gray-100 shadow-sm flex flex-col md:flex-row justify-between gap-4 items-center">
                         <div className="relative w-full max-w-xl">
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                             <input
@@ -175,9 +175,9 @@ export const EventParticipants = () => {
                                 <thead>
                                     <tr className="border-b border-gray-100 bg-gray-50/50">
                                         <th className="py-5 pl-8 text-[12px] font-black uppercase tracking-[0.2em] text-gray-500">Student</th>
-                                        <th className="text-[12px] font-black uppercase tracking-[0.2em] text-gray-500">College Info</th>
-                                        <th className="text-[12px] font-black uppercase tracking-[0.2em] text-gray-500">Contact</th>
-                                        <th className="text-[12px] font-black uppercase tracking-[0.2em] text-gray-500">Status</th>
+                                        <th className="hidden sm:block text-[12px] font-black uppercase tracking-[0.2em] text-gray-500">College Info</th>
+                                        <th className="hidden sm:block text-[12px] font-black uppercase tracking-[0.2em] text-gray-500">Contact</th>
+                                        <th className="hidden sm:block text-[12px] font-black uppercase tracking-[0.2em] text-gray-500">Status</th>
                                         <th className="text-center pr-8 text-[12px] font-black uppercase tracking-[0.2em] text-gray-500">Attendance</th>
                                     </tr>
                                 </thead>
@@ -185,7 +185,7 @@ export const EventParticipants = () => {
                                     {filteredParticipants.length > 0 ? (
                                         filteredParticipants.map((p) => (
                                             <tr key={p._id} className={`hover:bg-gray-50/50 transition-colors group ${p.status === 'cancelled' ? 'opacity-60 grayscale' : ''}`}>
-                                                <td className="py-6 pl-8">
+                                                <td className=" py-6 pl-8">
                                                     <div className="flex items-center gap-4">
                                                         <div className="w-12 h-12 rounded-lg overflow-hidden shadow-sm flex-shrink-0 bg-gray-100 border border-gray-200 group-hover:scale-105 transition-transform">
                                                             <img
@@ -194,13 +194,13 @@ export const EventParticipants = () => {
                                                                 className="w-full h-full object-cover"
                                                             />
                                                         </div>
-                                                        <div>
+                                                        <div className='font-sans'>
                                                             <p className="font-bold text-gray-900 text-lg group-hover:text-blue-600 transition-colors">{p.student?.fullName || 'Deleted Account'}</p>
-                                                            <p className="text-sm text-gray-400 font-medium">{p.student?.email}</p>
+                                                            <p className="hidden sm:block text-sm text-gray-400 font-medium">{p.student?.email}</p>
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td>
+                                                <td className='hidden sm:block'>
                                                     <div className="space-y-1">
                                                         <p className="text-md font-bold text-gray-700 flex items-center gap-1.5">
                                                             <Hash className="w-4 h-4 text-blue-500" /> {p.student?.rollNo || 'N/A'}
@@ -210,14 +210,14 @@ export const EventParticipants = () => {
                                                         </p>
                                                     </div>
                                                 </td>
-                                                <td>
+                                                <td className='hidden sm:block'>
                                                     <div className="space-y-1">
                                                         <p className="text-md font-bold text-gray-700 flex items-center gap-1.5">
                                                             <Smartphone className="w-4 h-4 text-emerald-500" /> {p.student?.phoneNumber || 'N/A'}
                                                         </p>
                                                     </div>
                                                 </td>
-                                                <td>
+                                                <td className='hidden sm:block'>
                                                     {p.status === 'confirmed' ? (
                                                         <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider">
                                                             Active
@@ -228,7 +228,7 @@ export const EventParticipants = () => {
                                                         </span>
                                                     )}
                                                 </td>
-                                                <td className="text-center pr-8">
+                                                <td className=" text-center pr-8">
                                                     {p.status !== 'cancelled' ? (
                                                         <button
                                                             onClick={() => handleToggleAttendance(p._id, p.attended)}
