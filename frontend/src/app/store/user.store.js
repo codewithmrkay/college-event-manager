@@ -104,15 +104,16 @@ export const useUserStore = create((set) => ({
   },
 
   // Update college fee image
-  updateCollegeFeeImage: async (collegeFeeImg) => {
+  updateCollegeFeeImage: async (collegeFeeImg, feeReceiptNo) => {
     try {
       set({ loading: true, error: null, success: null });
-      const data = await updateCollegeFeeImage({ collegeFeeImg });
+      const data = await updateCollegeFeeImage({ collegeFeeImg, feeReceiptNo });
 
       set((state) => ({
         user: {
           ...state.user,
           collegeFeeImg: data.collegeFeeImg,
+          feeReceiptNo: data.feeReceiptNo,
           isVerified: data.isVerified // Reset to false
         },
         success: data.message,

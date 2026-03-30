@@ -112,7 +112,7 @@ const EventsCard = () => {
   };
 
   return (
-    <section className="w-full py-5 h-screen">
+    <section className="w-full py-5 min-h-screen">
       <div className="max-w-6xl mx-auto">
         <FilterEvents activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
         {loading ? (
@@ -127,7 +127,7 @@ const EventsCard = () => {
             <p className="mt-4 text-gray-500 text-2xl font-mangodolly font-medium animate-pulse">No {activeFilter} events found.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-screen">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-screen">
             {displayEvents.map((event) => (
               <div
                 key={event.id}

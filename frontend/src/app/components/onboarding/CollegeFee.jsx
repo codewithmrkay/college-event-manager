@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Check, Upload, Loader2 } from 'lucide-react';
+import { Check, Upload, Loader2, Hash } from 'lucide-react';
 import { useUserStore } from '../../store/user.store';
 import toast from 'react-hot-toast';
 
 const CollegeFee = () => {
     const [preview, setPreview] = useState(null);
     const [cloudinaryUrl, setCloudinaryUrl] = useState('');
+    const [feeReceiptNo, setFeeReceiptNo] = useState('');
+    const [receiptNoError, setReceiptNoError] = useState('');
     const [uploading, setUploading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
@@ -15,10 +17,11 @@ const CollegeFee = () => {
 
     useEffect(() => {
         if (user?.collegeFeeImg) {
-            setPreview(user.collegeFeeImg)
+            setPreview(user.collegeFeeImg);
+            setFeeReceiptNo(user?.feeReceiptNo || '');
             setIsOpen(false);
         };
-    }, [user?.collegeFeeImg]);
+    }, [user?.collegeFeeImg, user?.feeReceiptNo]);
 
     const isSaved = user?.collegeFeeImg && !cloudinaryUrl;
 
@@ -37,8 +40,8 @@ const CollegeFee = () => {
         }
 
         if (file.size > 5 * 1024 * 1024) {
-            setError('Image must be less than 2MB');
-            toast.error('Image must be less than 2MB');
+            setError('Image must be less than 5MB');
+            toast.error('Image must be less than 5MB');
             return;
         }
 
@@ -48,12 +51,6 @@ const CollegeFee = () => {
 
         img.onload = async () => {
             URL.revokeObjectURL(url);
-
-            // if (img.width !== img.height) {
-            //     setError('Image must be square');
-            //     toast.error('Image must be square');
-            //     return;
-            // }
 
             // Valid - show preview and upload
             setPreview(URL.createObjectURL(file));
@@ -91,7 +88,7 @@ const CollegeFee = () => {
                 setCloudinaryUrl(data.secure_url);
 
                 // Success toast
-                toast.success('Image uploaded! Click Save to update College Fee Picture', {
+                toast.success('Image uploaded! Enter receipt number & click Save', {
                     id: uploadToast,
                     duration: 4000
                 });
@@ -114,20 +111,32 @@ const CollegeFee = () => {
         img.src = url;
     };
 
+    const handleReceiptNoChange = (value) => {
+        setFeeReceiptNo(value.toUpperCase());
+        setReceiptNoError('');
+    };
+
     const handleSave = async () => {
         if (!cloudinaryUrl) return;
+
+        // Validate receipt number
+        if (!feeReceiptNo.trim()) {
+            setReceiptNoError('Fee receipt / cheque number is required');
+            toast.error('Please enter the fee receipt / cheque number');
+            return;
+        }
 
         setSaving(true);
         setError('');
 
-        const saveToast = toast.loading('Saving Fees picture...');
+        const saveToast = toast.loading('Saving fee receipt...');
 
         try {
-            const result = await updateCollegeFeeImage(cloudinaryUrl);
+            const result = await updateCollegeFeeImage(cloudinaryUrl, feeReceiptNo.trim());
             if (!result.success) throw new Error(result.error || 'Failed to save');
 
             setCloudinaryUrl('');
-            toast.success('Fees picture saved successfully!', { id: saveToast });
+            toast.success('Fee receipt saved! Awaiting admin verification.', { id: saveToast });
 
         } catch (err) {
             setError(err.message);
@@ -136,13 +145,6 @@ const CollegeFee = () => {
             setSaving(false);
         }
     };
-
-    // const handleChangeClick = () => {
-    //     toast('Select a new image to change your profile picture', {
-    //         icon: '🖼️',
-    //         duration: 3000
-    //     });
-    // };
 
     return (
         <div className="shadow-xl collapse collapse-arrow bg-base-100 border border-gray-200 rounded-lg">
@@ -155,14 +157,15 @@ const CollegeFee = () => {
                     {isSaved ? <Check className="w-5 h-5 text-white" strokeWidth={3} /> : <Upload className="w-5 h-5 text-white" />}
                 </div>
                 <div>
-                    <h3 className="text-lg font-semibold">College Fees Picture</h3>
-                    <p className="text-sm text-gray-500">max 5MB</p>
+                    <h3 className="text-lg font-semibold">College Fees Receipt</h3>
+                    <p className="text-sm text-gray-500">Upload receipt image &amp; enter cheque / DD number</p>
                 </div>
             </div>
 
             <div className="collapse-content">
-                <div className="space-y-4">
+                <div className="flex flex-col gap-4">
 
+                    {/* Image Upload */}
                     <label className="block">
                         <div className={`relative w-64 h-64 mx-auto border-2 border-dashed rounded-lg transition-colors overflow-hidden bg-gray-50 ${uploading || saving
                             ? 'border-gray-300 cursor-not-allowed'
@@ -199,9 +202,42 @@ const CollegeFee = () => {
                     {error && <p className="text-error text-sm text-center">{error}</p>}
 
                     {cloudinaryUrl && !error && (
-                        <p className="text-success text-sm text-center">✓ Uploaded! Click Save</p>
+                        <p className="text-success text-sm text-center">✓ Uploaded! Enter receipt number &amp; click Save</p>
                     )}
 
+                    {/* Fee Receipt / Cheque Number Input */}
+                    <div className="form-control">
+                        <label className="label">
+                            <span className="label-text font-medium text-base">
+                                Fee Receipt / Cheque No. *
+                            </span>
+                        </label>
+                        <div className="relative">
+                            <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
+                                <Hash className="w-5 h-5 text-blue-500" />
+                            </div>
+                            <input
+                                type="text"
+                                placeholder="e.g. CHQ123456 or DD789012"
+                                value={feeReceiptNo}
+                                onChange={(e) => handleReceiptNoChange(e.target.value)}
+                                className={`input input-lg w-full pl-12 border-2 ${receiptNoError ? 'border-red-500' : 'border-gray-300'
+                                    } focus:border-blue-500 focus:outline-none tracking-widest uppercase`}
+                                disabled={saving || uploading}
+                                maxLength={30}
+                            />
+                        </div>
+                        {receiptNoError && (
+                            <span className="text-red-500 text-xs mt-1">{receiptNoError}</span>
+                        )}
+                        {user?.feeReceiptNo && !cloudinaryUrl && (
+                            <span className="text-gray-400 text-xs mt-1">
+                                Saved: <span className="font-semibold tracking-widest">{user.feeReceiptNo}</span>
+                            </span>
+                        )}
+                    </div>
+
+                    {/* Action Buttons */}
                     <div className="flex justify-end gap-2">
                         {isSaved && (
                             <label

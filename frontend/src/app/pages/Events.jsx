@@ -3,7 +3,7 @@ import EventsCard from '../components/events/EventsCard'
 
 export const Events = () => {
   return (
-    <div className='w-full'>
+    <div className='w-full min-h-screen'>
       <EventsCard/>
     </div>
   )

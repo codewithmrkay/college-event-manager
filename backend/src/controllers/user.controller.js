@@ -21,6 +21,7 @@ export const getUserProfile = async (req, res) => {
             class: user.class,
             rollNo: user.rollNo,
             collegeFeeImg: user.collegeFeeImg,
+            feeReceiptNo: user.feeReceiptNo,
 
             // Contact section
             phoneNumber: user.phoneNumber,
