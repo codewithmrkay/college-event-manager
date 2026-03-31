@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-
+import {useNavigate} from "react-router-dom"
 export const Mangodolly = () => {
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const containerRef = useRef(null);
-
+ const navigate = useNavigate(); 
     useEffect(() => {
         const handleGlobalMouseMove = (e) => {
             if (!containerRef.current) return;
@@ -34,7 +34,12 @@ export const Mangodolly = () => {
         // Clean up on unmount
         return () => window.removeEventListener('mousemove', handleGlobalMouseMove);
     }, []);
-
+    const hadleExplore = ()=>{
+        navigate('/events')
+    }
+    const hadleCreate = ()=>{
+        navigate('/dashboard')
+    }
     return (
         /* The container determines the "whole component" area */
         <div className='w-full py-5 flex flex-col border-b-2 border-gray-300'>
@@ -75,10 +80,10 @@ export const Mangodolly = () => {
                 </div>
             </div>
             <div className=' mt-3 md:mt-0 flex flex-col w-full md:flex-row items-center justify-center gap-5'>
-                <button className='font-sans btn btn-lg w-full max-w-md md:max-w-xs border-none md:btn-xl hover:bg-blue-700 bg-blue-600 text-white '>
+                <button onClick={hadleCreate} className='font-sans btn btn-lg w-full max-w-md md:max-w-xs border-none md:btn-xl hover:bg-blue-700 bg-blue-600 text-white '>
                     Create Your First Event
                 </button>
-                <button className='font-sans btn btn-lg w-full max-w-md md:max-w-xs border-none md:btn-xl hover:bg-pink-700 bg-pink-600 text-pink-50'>
+                <button onClick={hadleExplore} className='font-sans btn btn-lg w-full max-w-md md:max-w-xs border-none md:btn-xl hover:bg-pink-700 bg-pink-600 text-pink-50'>
                     Explore Events
                 </button>
             </div>
