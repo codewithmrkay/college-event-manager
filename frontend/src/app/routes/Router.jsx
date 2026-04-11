@@ -11,6 +11,7 @@ import { Profile } from "../pages/Profile";
 import { VerifyOtp } from "../pages/VerifyOtp";
 
 import { AdminRoute } from "./AdminRoute";
+import { SuperAdminRoute } from "./SuperAdminRoute";
 import { AdminLayout } from "../layouts/AdminLayout";
 import { AdminDashboard } from "../pages/admin/AdminDashboard";
 import { AdminEventList } from "../pages/admin/AdminEventList";
@@ -18,6 +19,13 @@ import { SuperAdminVerifyList } from "../pages/admin/SuperAdminVerifyList";
 import { CreateEvent } from "../pages/admin/CreateEvent";
 import { EventParticipants } from "../pages/admin/EventParticipants";
 import EventDetails from "../pages/EventDetails";
+
+// Super-Admin pages
+import { SuperAdminDashboard } from "../pages/admin/SuperAdminDashboard";
+import { SuperAdminStudentList } from "../pages/admin/SuperAdminStudentList";
+import { SuperAdminStudentDetail } from "../pages/admin/SuperAdminStudentDetail";
+import { SuperAdminEventList } from "../pages/admin/SuperAdminEventList";
+import { SuperAdminEventDetail } from "../pages/admin/SuperAdminEventDetail";
 
 const router = createBrowserRouter([
   {
@@ -58,6 +66,20 @@ const router = createBrowserRouter([
       { path: "/admin/events/edit/:idOrSlug", element: <CreateEvent /> },
       { path: "/admin/events/:idOrSlug/participants", element: <EventParticipants /> },
       { path: "/admin/events/:idOrSlug", element: <EventDetails /> },
+    ],
+  },
+  {
+    element: (
+      <SuperAdminRoute>
+        <AdminLayout />
+      </SuperAdminRoute>
+    ),
+    children: [
+      { path: "/super-admin/dashboard", element: <SuperAdminDashboard /> },
+      { path: "/super-admin/students", element: <SuperAdminStudentList /> },
+      { path: "/super-admin/students/:id", element: <SuperAdminStudentDetail /> },
+      { path: "/super-admin/events", element: <SuperAdminEventList /> },
+      { path: "/super-admin/events/:id", element: <SuperAdminEventDetail /> },
     ],
   },
 ]);

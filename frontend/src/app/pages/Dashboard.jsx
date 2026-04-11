@@ -65,7 +65,11 @@ export const Dashboard = () => {
     );
   }
 
-  if (user && (user.role === "admin" || user.role === "super-admin")) {
+  if (user?.role === "super-admin") {
+    return <Navigate to="/super-admin/dashboard" />;
+  }
+
+  if (user?.role === "admin") {
     return <Navigate to="/admin-dashboard" />;
   }
 
@@ -83,7 +87,7 @@ export const Dashboard = () => {
         </div>
         {!user?.isOnboarded && (
           <Link
-            to="/onboarding"
+            to="/profile"
             className="btn btn-primary btn-lg bg-pink-500 hover:bg-pink-600 border-none rounded-md px-6 shadow-lg text-white"
           >
             <Star className="w-5 h-5 mr-2" /> Complete Profile
@@ -232,7 +236,7 @@ export const Dashboard = () => {
               <p className="text-pink-100 text-md leading-relaxed mb-6 relative z-10">
                 You need to complete your profile to register for events and show interest.
               </p>
-              <Link to="/onboarding" className="relative z-10 btn w-full bg-white hover:bg-pink-50 text-pink-600 border-none font-bold rounded-xl shadow-md flex items-center justify-center gap-2">
+              <Link to="/profile" className="relative z-10 btn w-full bg-white hover:bg-pink-50 text-pink-600 border-none font-bold rounded-xl shadow-md flex items-center justify-center gap-2">
                 Complete Now <ArrowRight className="w-4 h-4" />
               </Link>
             </div>

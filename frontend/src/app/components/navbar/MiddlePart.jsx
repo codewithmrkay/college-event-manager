@@ -1,14 +1,22 @@
 import { useLocation, useNavigate } from "react-router-dom";
+import { useUserStore } from "../../store/user.store";
 
 export const MiddlePart = ({ isMobile, setIsMobileMenuOpen }) => {
     const location = useLocation();
     const currentPath = location.pathname;
     const navigate = useNavigate();
+    const { user } = useUserStore();
 
     const navpages = ['Home', 'Dashboard', 'Events', 'Applications'];
 
+    const getDashboardPath = () => {
+        if (user?.role === 'super-admin') return '/super-admin/dashboard';
+        if (user?.role === 'admin') return '/admin-dashboard';
+        return '/dashboard';
+    };
+
     const handleclick = (val) => {
-        const path = val === 'Home' ? '/' : `/${val.toLowerCase()}`;
+        const path = val === 'Home' ? '/' : val === 'Dashboard' ? getDashboardPath() : `/${val.toLowerCase()}`;
         navigate(path);
         if (setIsMobileMenuOpen) setIsMobileMenuOpen(false);
     };

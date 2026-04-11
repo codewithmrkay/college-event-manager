@@ -1,17 +1,30 @@
 import { useLocation, useNavigate } from "react-router-dom";
+import { useUserStore } from "../../store/user.store";
 
 export const AdminMiddlePart = ({ isMobile, setIsMobileMenuOpen }) => {
     const location = useLocation();
     const currentPath = location.pathname;
     const navigate = useNavigate();
+    const { user } = useUserStore();
 
-    const navpages = ['Home', 'Dashboard', 'Manage Events'];
+    const isSuperAdmin = user?.role === 'super-admin';
+
+    // Super-admins get their own nav links
+    const navpages = isSuperAdmin
+        ? ['Home', 'Dashboard', 'Verify Students', 'Verify Events']
+        : ['Home', 'Dashboard', 'Manage Events'];
+
+    const getPath = (val) => {
+        if (val === 'Home') return '/';
+        if (val === 'Dashboard') return isSuperAdmin ? '/super-admin/dashboard' : '/admin-dashboard';
+        if (val === 'Manage Events') return '/admin/events';
+        if (val === 'Verify Students') return '/super-admin/students';
+        if (val === 'Verify Events') return '/super-admin/events';
+        return '/';
+    };
 
     const handleclick = (val) => {
-        let path = '/';
-        if (val === 'Dashboard') path = '/admin-dashboard';
-        if (val === 'Manage Events') path = '/admin/events';
-        navigate(path);
+        navigate(getPath(val));
         if (setIsMobileMenuOpen) setIsMobileMenuOpen(false);
     };
 
@@ -19,12 +32,12 @@ export const AdminMiddlePart = ({ isMobile, setIsMobileMenuOpen }) => {
         <div className={isMobile ? 'w-full' : ''}>
             <div className={`flex ${isMobile ? 'flex-col items-start gap-4 w-full' : 'items-center justify-center gap-5'} font-medium`}>
                 {navpages.map((page) => {
-                    let pagePath = '/';
-                    if (page === 'Dashboard') pagePath = '/admin-dashboard';
-                    if (page === 'Manage Events') pagePath = '/admin/events';
-
-                    // Exact match for admin root, otherwise startsWith is tricky, so let's do exact match except maybe for events
-                    const isActive = currentPath === pagePath || (page === 'Manage Events' && currentPath.startsWith('/admin/events/'));
+                    const pagePath = getPath(page);
+                    const isActive =
+                        currentPath === pagePath ||
+                        (page === 'Manage Events' && currentPath.startsWith('/admin/events/')) ||
+                        (page === 'Verify Students' && currentPath.startsWith('/super-admin/students')) ||
+                        (page === 'Verify Events' && currentPath.startsWith('/super-admin/events'));
 
                     return (
                         <li
