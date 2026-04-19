@@ -14,7 +14,9 @@ const RulesInfo = ({ draftEventId, onSaved, isCompleted }) => {
         gender: 'All',
         rules: [],
         eligibility: [],
-        schedule: []
+        schedule: [],
+        requiresMusic: false,
+        requiresPdf: false
     });
 
     const [newRule, setNewRule] = useState('');
@@ -28,7 +30,9 @@ const RulesInfo = ({ draftEventId, onSaved, isCompleted }) => {
                 gender: currentEvent.gender || 'All',
                 rules: currentEvent.rules || [],
                 eligibility: currentEvent.eligibility || [],
-                schedule: currentEvent.schedule || []
+                schedule: currentEvent.schedule || [],
+                requiresMusic: currentEvent.requiresMusic || false,
+                requiresPdf: currentEvent.requiresPdf || false
             });
         }
     }, [draftEventId, currentEvent]);
@@ -41,7 +45,9 @@ const RulesInfo = ({ draftEventId, onSaved, isCompleted }) => {
                 gender: formData.gender,
                 rules: formData.rules,
                 eligibility: formData.eligibility,
-                schedule: formData.schedule
+                schedule: formData.schedule,
+                requiresMusic: formData.requiresMusic,
+                requiresPdf: formData.requiresPdf
             });
             setIsSaved(true);
             setIsOpen(false);
@@ -255,6 +261,32 @@ const RulesInfo = ({ draftEventId, onSaved, isCompleted }) => {
                                     </div>
                                 ))}
                             </div>
+                        </div>
+                    </div>
+
+                    <div className="form-control">
+                        <label className="label">
+                            <span className="label-text font-medium text-base">Additional Requirements</span>
+                        </label>
+                        <div className="flex flex-col gap-4 bg-blue-50/20 p-4 border border-blue-100 rounded-xl">
+                            <label className="flex items-center gap-3 cursor-pointer p-3 border-2 rounded-lg hover:border-blue-500 transition-colors bg-white border-gray-200">
+                                <input
+                                    type="checkbox"
+                                    className="checkbox checkbox-primary"
+                                    checked={formData.requiresMusic}
+                                    onChange={(e) => handleChange('requiresMusic', e.target.checked)}
+                                />
+                                <span className="font-medium text-gray-700">Require Audio File (.mp3) from participants</span>
+                            </label>
+                            <label className="flex items-center gap-3 cursor-pointer p-3 border-2 rounded-lg hover:border-blue-500 transition-colors bg-white border-gray-200">
+                                <input
+                                    type="checkbox"
+                                    className="checkbox checkbox-primary"
+                                    checked={formData.requiresPdf}
+                                    onChange={(e) => handleChange('requiresPdf', e.target.checked)}
+                                />
+                                <span className="font-medium text-gray-700">Require PDF Document from participants</span>
+                            </label>
                         </div>
                     </div>
 

@@ -28,10 +28,16 @@ const filterToParam = {
     all: {},
     pending: { verified: 'pending' },
     verified: { verified: 'true' },
-    'not-onboarded': {},
+    'not-onboarded': { isOnboarded: 'false' },
 };
 
 const getStatusBadge = (student) => {
+    // Show Admin role pill first if applicable
+    if (student.role === 'admin') return (
+        <span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider flex items-center gap-1.5 w-fit">
+            <ShieldCheck className="w-4 h-4" /> Admin
+        </span>
+    );
     if (!student.isOnboarded) return (
         <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider flex items-center gap-1.5 w-fit">
             <XCircle className="w-4 h-4" /> Not Onboarded
@@ -64,13 +70,8 @@ export const SuperAdminStudentList = () => {
 
     const load = (overrides = {}) => {
         const base = filterToParam[activeFilter] ?? {};
-        const params = { page, limit: 20, ...(search ? { search } : {}), ...base, ...overrides };
-        // Not-onboarded filter: isOnboarded: false has no direct API param — we filter client-side by choosing 'all' and filtering
-        if (activeFilter === 'not-onboarded') {
-            fetchStudents({ page, limit: 100, ...(search ? { search } : {}) });
-        } else {
-            fetchStudents(params);
-        }
+        const params = { page, ...(search ? { search } : {}), ...base, ...overrides };
+        fetchStudents(params);
     };
 
     useEffect(() => {
@@ -88,9 +89,7 @@ export const SuperAdminStudentList = () => {
         setPage(1);
     };
 
-    const displayStudents = activeFilter === 'not-onboarded'
-        ? students.filter((s) => !s.isOnboarded)
-        : students;
+    const displayStudents = students;
 
     const totalPages = studentPagination?.totalPages ?? 1;
 
@@ -104,6 +103,11 @@ export const SuperAdminStudentList = () => {
                     </Link>
                     <h1 className="text-3xl font-black text-gray-900 font-mangodolly flex items-center gap-3">
                         <Users className="w-8 h-8 text-blue-500" /> Student Verification
+                        {studentPagination && (
+                            <span className="text-base font-bold text-gray-400 bg-gray-100 px-3 py-1 rounded-full">
+                                {displayStudents.length} / {studentPagination.total}
+                            </span>
+                        )}
                     </h1>
                     <p className="text-gray-500 font-medium text-xl mt-1">
                         Review fee receipts and approve student accounts.

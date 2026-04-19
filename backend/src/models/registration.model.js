@@ -34,6 +34,14 @@ const registrationSchema = new mongoose.Schema({
         type: String,   // Cloudinary URL of payment screenshot
         default: null,
     },
+    audioFile: {
+        type: String,   // Cloudinary URL of audio file
+        default: null,
+    },
+    pdfFile: {
+        type: String,   // Cloudinary URL of pdf file
+        default: null,
+    },
 
     // ── Status ────────────────────────────────────────────────────────────
     status: {

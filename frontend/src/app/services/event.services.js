@@ -127,8 +127,8 @@ export const verifyEvent = async (id, data) => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 // Apply to an event
-export const applyToEvent = async (eventId) => {
-    const res = await api.post(`/events/${eventId}/apply`);
+export const applyToEvent = async (eventId, data) => {
+    const res = await api.post(`/events/${eventId}/apply`, data);
     return res.data;
 };
 

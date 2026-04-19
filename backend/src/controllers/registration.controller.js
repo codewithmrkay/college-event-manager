@@ -57,12 +57,24 @@ export const applyEvent = async (req, res) => {
             return res.status(400).json({ message: 'You have already applied for this event' });
         }
 
-        // 5. Create registration
+        // 5. Extract and validate additional info (audio/pdf)
+        const { audioFile, pdfFile } = req.body;
+
+        if (event.requiresMusic && !audioFile) {
+            return res.status(400).json({ message: 'Audio file is required for this event' });
+        }
+        if (event.requiresPdf && !pdfFile) {
+            return res.status(400).json({ message: 'PDF file is required for this event' });
+        }
+
+        // 6. Create registration
         const registration = new Registration({
             event: eventId,
             student: studentId,
             status: 'confirmed', // Instant registration as requested
             paymentStatus: event.registrationFee === 0 ? 'free' : 'pending',
+            audioFile: event.requiresMusic ? audioFile : null,
+            pdfFile: event.requiresPdf ? pdfFile : null,
         });
         await registration.save();
 

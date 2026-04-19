@@ -5,7 +5,7 @@ import {
     Award, Shield, Clock, Info,
     User, Mail, ArrowLeft, RefreshCw,
     CheckCircle, XCircle, Loader2,
-    Sticker
+    Sticker, Music, FileText, CloudUpload
 } from 'lucide-react';
 import { useAdminEventStore } from '../store/adminEvent.store';
 import { getPublicEventBySlug, applyToEvent, getMyApplications } from '../services/event.services';
@@ -25,7 +25,12 @@ const EventDetails = () => {
     const [myRegistration, setMyRegistration] = useState(null); // null | registration object
     const [authChecked, setAuthChecked] = useState(false);
     const { fetchEventById } = useAdminEventStore();
-    const { user, loading: authLoading, getProfile } = useUserStore();
+    const { user, loading: authLoading, getProfile, getuploadsign } = useUserStore();
+
+    // Additional file requirements
+    const [audioUrl, setAudioUrl] = useState('');
+    const [pdfUrl, setPdfUrl] = useState('');
+    const [uploadingFile, setUploadingFile] = useState(null); // 'audio' | 'pdf' | null
 
     const loadEventData = async () => {
         setLoading(true);
@@ -80,6 +85,61 @@ const EventDetails = () => {
         }
     }, [event, user]);
 
+    const uploadFile = async (file, type) => {
+        if (!file) return;
+
+        // Validation
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error(`${type.toUpperCase()} file must be less than 5MB`);
+            return;
+        }
+
+        if (type === 'audio' && !file.type.startsWith('audio/')) {
+            toast.error('Please select an audio file (mp3)');
+            return;
+        }
+
+        if (type === 'pdf' && file.type !== 'application/pdf') {
+            toast.error('Please select a PDF file');
+            return;
+        }
+
+        setUploadingFile(type);
+        const uploadToast = toast.loading(`Uploading ${type}...`);
+
+        try {
+            const signData = await getuploadsign({ folder: 'event_submissions' });
+            if (!signData.success) {
+                throw new Error(signData.error || 'Failed to get upload authorization');
+            }
+            if (!signData.data) throw new Error('Upload configuration missing');
+
+            const { signature, timestamp, cloudName, apiKey, folder } = signData.data;
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('signature', signature);
+            formData.append('timestamp', timestamp);
+            formData.append('api_key', apiKey);
+            formData.append('folder', folder);
+
+            const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`;
+
+            const res = await fetch(uploadUrl, { method: 'POST', body: formData });
+            if (!res.ok) throw new Error('Upload failed');
+
+            const data = await res.json();
+            if (type === 'audio') setAudioUrl(data.secure_url);
+            else setPdfUrl(data.secure_url);
+
+            toast.success(`${type.toUpperCase()} uploaded successfully!`, { id: uploadToast });
+        } catch (err) {
+            console.error(err);
+            toast.error(`Failed to upload ${type}`, { id: uploadToast });
+        } finally {
+            setUploadingFile(null);
+        }
+    };
+
     const handleApply = async () => {
         // If auth is still resolving, wait for it first
         if (!authChecked || authLoading) {
@@ -92,7 +152,10 @@ const EventDetails = () => {
         }
         setApplying(true);
         try {
-            const res = await applyToEvent(event._id);
+            const res = await applyToEvent(event._id, {
+                audioFile: audioUrl,
+                pdfFile: pdfUrl
+            });
             toast.success(res.message || 'Successfully applied!');
             // Refresh registration state
             await checkMyRegistration(event._id);
@@ -189,17 +252,93 @@ const EventDetails = () => {
 
         // 5. Default: register
         return (
-            <button
-                onClick={handleApply}
-                disabled={applying}
-                className="btn btn-lg border-none shadow-none w-full bg-blue-500 hover:bg-blue-600 text-white text-lg disabled:opacity-70 disabled:scale-100"
-            >
-                {applying ? (
-                    <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Applying...</>
-                ) : (
-                    'Register Now'
+            <div className="flex flex-col gap-4 w-full">
+                {/* Upload Section */}
+                {(event.requiresMusic || event.requiresPdf) && (
+                    <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100 flex flex-col gap-3">
+                        <p className="text-sm font-bold text-blue-800 flex items-center gap-2">
+                            Submission Requirements
+                        </p>
+
+                        {event.requiresMusic && (
+                            <div className="flex flex-col gap-1">
+                                <label className={`flex items-center justify-between p-3 border-2 border-dashed rounded-lg transition-all cursor-pointer bg-white ${audioUrl ? 'border-green-500 bg-green-50/20' : 'border-gray-300 hover:border-blue-400'}`}>
+                                    <div className="flex items-center gap-3">
+                                        <Music className={`w-5 h-5 ${audioUrl ? 'text-green-600' : 'text-gray-400'}`} />
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-semibold">{audioUrl ? 'Audio Uploaded' : 'Upload Audio (.mp3)'}</span>
+                                            <span className="text-[10px] text-gray-500">Max 5MB</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        {uploadingFile === 'audio' ? (
+                                            <Loader2 className="w-5 h-5 animate-spin text-blue-500" />
+                                        ) : audioUrl ? (
+                                            <CheckCircle className="w-5 h-5 text-green-500" />
+                                        ) : (
+                                            <CloudUpload className="w-5 h-5 text-gray-400" />
+                                        )}
+                                    </div>
+                                    <input
+                                        type="file"
+                                        accept="audio/mpeg,audio/mp3"
+                                        className="hidden"
+                                        onChange={(e) => uploadFile(e.target.files[0], 'audio')}
+                                        disabled={uploadingFile !== null}
+                                    />
+                                </label>
+                            </div>
+                        )}
+
+                        {event.requiresPdf && (
+                            <div className="flex flex-col gap-1">
+                                <label className={`flex items-center justify-between p-3 border-2 border-dashed rounded-lg transition-all cursor-pointer bg-white ${pdfUrl ? 'border-green-500 bg-green-50/20' : 'border-gray-300 hover:border-blue-400'}`}>
+                                    <div className="flex items-center gap-3">
+                                        <FileText className={`w-5 h-5 ${pdfUrl ? 'text-green-600' : 'text-gray-400'}`} />
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-semibold">{pdfUrl ? 'PDF Uploaded' : 'Upload PDF Document'}</span>
+                                            <span className="text-[10px] text-gray-500">Max 5MB</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        {uploadingFile === 'pdf' ? (
+                                            <Loader2 className="w-5 h-5 animate-spin text-blue-500" />
+                                        ) : pdfUrl ? (
+                                            <CheckCircle className="w-5 h-5 text-green-500" />
+                                        ) : (
+                                            <CloudUpload className="w-5 h-5 text-gray-400" />
+                                        )}
+                                    </div>
+                                    <input
+                                        type="file"
+                                        accept=".pdf,application/pdf"
+                                        className="hidden"
+                                        onChange={(e) => uploadFile(e.target.files[0], 'pdf')}
+                                        disabled={uploadingFile !== null}
+                                    />
+                                </label>
+                            </div>
+                        )}
+                    </div>
                 )}
-            </button>
+
+                <button
+                    onClick={handleApply}
+                    disabled={applying || uploadingFile !== null || (event.requiresMusic && !audioUrl) || (event.requiresPdf && !pdfUrl)}
+                    className="btn btn-lg border-none shadow-none w-full bg-blue-500 hover:bg-blue-600 text-white text-lg disabled:opacity-70 disabled:scale-100"
+                >
+                    {applying ? (
+                        <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Applying...</>
+                    ) : (
+                        'Register Now'
+                    )}
+                </button>
+                {(event.requiresMusic && !audioUrl || event.requiresPdf && !pdfUrl) && (
+                    <p className="text-[10px] text-center text-red-500 font-bold animate-pulse">
+                        * Please upload required files to enable registration
+                    </p>
+                )}
+            </div>
         );
     };
 

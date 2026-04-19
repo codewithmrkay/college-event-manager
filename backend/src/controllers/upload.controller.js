@@ -10,7 +10,7 @@ export const getUploadSignature = async (req, res) => {
         const { folder } = req.body;  // e.g., 'profiles' or 'fee-receipts'
 
         // Validate folder name (security — prevent uploading to random folders)
-        const allowedFolders = ['profiles', 'fee-receipts', 'event-banners', 'admin-profiles', 'events'];
+        const allowedFolders = ['profiles', 'fee-receipts', 'event-banners', 'admin-profiles', 'events', 'event_submissions'];
 
         if (!allowedFolders.includes(folder)) {
             return res.status(400).json({ message: "Invalid folder name" });

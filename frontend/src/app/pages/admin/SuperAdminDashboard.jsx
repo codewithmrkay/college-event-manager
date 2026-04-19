@@ -23,8 +23,8 @@ export const SuperAdminDashboard = () => {
 
     const statCards = [
         {
-            label: 'Total Students',
-            value: stats?.total ?? '—',
+            label: 'Total Users',
+            value: stats?.totalAllUsers ?? '—',
             icon: Users,
             color: 'text-blue-600',
             bg: 'bg-blue-100',
@@ -32,14 +32,14 @@ export const SuperAdminDashboard = () => {
         },
         {
             label: 'Total Admins',
-            value: adminCount ?? '—',
+            value: adminCount ?? stats?.totalAdmins ?? '—',
             icon: UserCog,
             color: 'text-indigo-600',
             bg: 'bg-indigo-100',
             border: 'border-indigo-200',
         },
         {
-            label: 'Verified',
+            label: 'Verified Students',
             value: stats?.verified ?? '—',
             icon: CheckCircle2,
             color: 'text-emerald-600',

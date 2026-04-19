@@ -205,23 +205,29 @@ export const completeSAOnboarding = async (req, res) => {
  */
 export const getStudentStats = async (req, res) => {
     try {
-        const [total, verified, pendingVerification, notRegistered] = await Promise.all([
-            // All users with role student
-            User.countDocuments({ role: 'student' }),
-            // Onboarded + verified
-            User.countDocuments({ role: 'student', isOnboarded: true, isVerified: true }),
-            // Onboarded but not yet verified (fee receipt submitted)
-            User.countDocuments({ role: 'student', isOnboarded: true, isVerified: false }),
-            // Not yet onboarded at all
-            User.countDocuments({ role: 'student', isOnboarded: false }),
+        const ALL_ROLES = { role: { $in: ['student', 'admin'] } };
+
+        const [totalAllUsers, totalAdmins, verified, pendingVerification, notOnboarded] = await Promise.all([
+            // Every account ever created (all roles)
+            User.countDocuments({}),
+            // Admin role count
+            User.countDocuments({ role: 'admin' }),
+            // Onboarded + verified (students & admins)
+            User.countDocuments({ ...ALL_ROLES, isOnboarded: true, isVerified: true }),
+            // Onboarded but NOT verified — awaiting review (students & admins)
+            User.countDocuments({ ...ALL_ROLES, isOnboarded: true, isVerified: false }),
+            // Not yet onboarded at all (students & admins)
+            User.countDocuments({ ...ALL_ROLES, isOnboarded: false }),
         ]);
 
         res.status(200).json({
             stats: {
-                total,
+                totalAllUsers,       // all roles — shown as "Total Users" on dashboard
+                total: totalAllUsers, // alias kept for older references
+                totalAdmins,
                 verified,
                 pendingVerification,
-                notRegistered,
+                notOnboarded,
             },
         });
     } catch (error) {
@@ -238,10 +244,17 @@ export const getStudentStats = async (req, res) => {
 export const getStudents = async (req, res) => {
     try {
         const page = Math.max(parseInt(req.query.page) || 1, 1);
-        const limit = Math.min(parseInt(req.query.limit) || 20, 100);
+        const limit = Math.min(parseInt(req.query.limit) || 50, 200);
         const skip = (page - 1) * limit;
 
-        const filter = { role: 'student' };
+        const filter = {};
+
+        // Optional role filter — if none provided, show ALL non-super-admin users
+        if (req.query.role && ['student', 'admin'].includes(req.query.role)) {
+            filter.role = req.query.role;
+        } else {
+            filter.role = { $in: ['student', 'admin'] };
+        }
 
         // Search: match fullName OR rollNo OR email (case-insensitive)
         if (req.query.search) {
@@ -258,6 +271,13 @@ export const getStudents = async (req, res) => {
         }
         if (req.query.class) {
             filter.class = req.query.class;
+        }
+
+        // isOnboarded filter — used by "Not Onboarded" tab
+        if (req.query.isOnboarded === 'false') {
+            filter.isOnboarded = false;
+        } else if (req.query.isOnboarded === 'true') {
+            filter.isOnboarded = true;
         }
 
         // verified filter
@@ -278,7 +298,7 @@ export const getStudents = async (req, res) => {
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit)
-                .select('fullName email gender department class rollNo profilePic collegeFeeImg isVerified isOnboarded phoneNumber createdAt'),
+                .select('fullName email gender department class rollNo profilePic collegeFeeImg isVerified isOnboarded phoneNumber role createdAt'),
             User.countDocuments(filter),
         ]);
 
@@ -314,10 +334,10 @@ export const verifyStudent = async (req, res) => {
             return res.status(400).json({ message: 'isVerified (boolean) is required' });
         }
 
-        const student = await User.findOne({ _id: id, role: 'student' });
-        if (!student) return res.status(404).json({ message: 'Student not found' });
+        const student = await User.findOne({ _id: id, role: { $in: ['student', 'admin'] } });
+        if (!student) return res.status(404).json({ message: 'User not found' });
         if (!student.isOnboarded) {
-            return res.status(400).json({ message: 'Student has not completed onboarding yet' });
+            return res.status(400).json({ message: 'User has not completed onboarding yet' });
         }
 
         student.isVerified = isVerified;
@@ -360,7 +380,7 @@ export const bulkVerifyStudents = async (req, res) => {
         }
 
         const result = await User.updateMany(
-            { _id: { $in: validIds }, role: 'student', isOnboarded: true },
+            { _id: { $in: validIds }, role: { $in: ['student', 'admin'] }, isOnboarded: true },
             { $set: { isVerified } }
         );
 
